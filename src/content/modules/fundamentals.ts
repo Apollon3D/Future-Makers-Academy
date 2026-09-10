@@ -38,6 +38,29 @@ Because the printer only adds material where the design needs it, you can make s
       ],
     },
     {
+      id: 'video-getting-started',
+      title: 'Watch: A Complete Beginner Walkthrough',
+      summary: 'A full tour — assembly, slicing, levelling and first prints.',
+      estMinutes: 22,
+      type: 'video',
+      provider: 'youtube',
+      src: 'T-Z3GmM20JM',
+      credit: 'Thomas Sanladerer (Made with Layers)',
+      intro:
+        'Before the detail lessons, watch one experienced maker take a printer from box to first print. You will recognise every stage from the previous lesson.',
+      body: `## What to notice
+
+- How little of the time is spent *printing* versus preparing (levelling, slicing, checking).
+- The slicer is where the settings decisions happen — that is the next module.
+- The first layer gets special attention. So does ours, later.
+
+Don't worry about memorising numbers from the video — the written lessons cover the specifics for your printer.`,
+      keyTakeaways: [
+        'The workflow in practice: set up → slice → watch the first layer → let it run.',
+        'Most of the skill is in preparation, not the print itself.',
+      ],
+    },
+    {
       id: 'printer-anatomy',
       title: 'Anatomy of an FDM Printer',
       summary: 'The hotend, extruder, motion system, bed, and controller.',

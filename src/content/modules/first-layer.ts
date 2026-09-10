@@ -38,6 +38,22 @@ Watch the first layer go down, every time. It costs two minutes and saves ten-ho
       ],
     },
     {
+      id: 'video-bed-levelling',
+      title: 'Watch: Bed Levelling for a Perfect First Layer',
+      summary: 'The aim and the method of manual bed levelling, demonstrated.',
+      estMinutes: 12,
+      type: 'video',
+      provider: 'youtube',
+      src: 'Ze36SX1xzOE',
+      credit: 'Teaching Tech',
+      intro:
+        'Seeing the paper-drag method done once makes the written steps click. Watch this before the tramming and Z-offset lessons.',
+      keyTakeaways: [
+        'Level hot, circle the corners several times, then check the centre.',
+        'You are matching the bed to the nozzle’s travel plane, not to gravity.',
+      ],
+    },
+    {
       id: 'tramming',
       title: 'Levelling & Tramming the Bed',
       summary: 'Making the bed physically parallel to the nozzle’s travel plane.',

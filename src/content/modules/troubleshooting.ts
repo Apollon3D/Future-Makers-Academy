@@ -40,6 +40,21 @@ Filament, dry or not, temp, speed, and what you changed. A one-line note per pri
       ],
     },
     {
+      id: 'video-print-quality',
+      title: 'Watch: A Step-by-Step Print Quality Guide',
+      summary: 'Working through print-quality problems methodically, on camera.',
+      estMinutes: 18,
+      type: 'video',
+      provider: 'youtube',
+      src: 'YPAXeBuq9qU',
+      intro:
+        'A walkthrough of diagnosing and fixing common defects — the same one-variable-at-a-time approach from the previous lesson, shown in practice.',
+      keyTakeaways: [
+        'Match the symptom to a cause before changing anything.',
+        'Small dedicated test prints beat re-running the whole part.',
+      ],
+    },
+    {
       id: 'stringing',
       title: 'Stringing & Oozing',
       summary: 'Fine hairs between separate parts of the print.',

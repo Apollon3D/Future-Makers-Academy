@@ -9,6 +9,7 @@ import { WidgetHost } from '../components/WidgetHost'
 import { QuizBlock } from '../components/QuizBlock'
 import { FlashcardReview } from '../components/FlashcardReview'
 import { ChecklistBlock } from '../components/ChecklistBlock'
+import { VideoPlayer } from '../components/VideoPlayer'
 
 export function LessonPlayer() {
   const { moduleId = '', lessonId = '' } = useParams()
@@ -150,6 +151,39 @@ export function LessonPlayer() {
             </>
           )}
 
+          {lesson.type === 'video' && (
+            <>
+              {lesson.intro && <p className="prose-lesson">{lesson.intro}</p>}
+              <VideoPlayer
+                provider={lesson.provider}
+                src={lesson.src}
+                credit={lesson.credit}
+                externalUrl={lesson.externalUrl}
+                chapters={lesson.chapters}
+              />
+              {lesson.body && (
+                <div className="prose-lesson mt-4">
+                  <Markdown source={lesson.body} />
+                </div>
+              )}
+              {lesson.keyTakeaways && lesson.keyTakeaways.length > 0 && (
+                <Card className="mt-6 border-accent/30 bg-accent-soft">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-accent">
+                    Key takeaways
+                  </div>
+                  <ul className="mt-2 space-y-1.5 text-sm text-text">
+                    {lesson.keyTakeaways.map((t, i) => (
+                      <li key={i} className="flex gap-2">
+                        <span className="text-accent">▸</span>
+                        {t}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              )}
+            </>
+          )}
+
           {lesson.type === 'interactive' && (
             <>
               {lesson.intro && (
@@ -233,7 +267,13 @@ export function LessonPlayer() {
                 disabled={lesson.type === 'checklist' && !checklistReady && !done}
                 variant={done ? 'outline' : 'primary'}
               >
-                {done ? (next ? 'Next lesson →' : 'Completed ✓') : 'Mark as complete'}
+                {done
+                  ? next
+                    ? 'Next lesson →'
+                    : 'Completed ✓'
+                  : lesson.type === 'video'
+                    ? 'Mark as watched'
+                    : 'Mark as complete'}
               </Button>
             )}
             {(lesson.type === 'quiz' || lesson.type === 'flashcards') &&

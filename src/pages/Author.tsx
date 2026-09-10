@@ -240,6 +240,12 @@ export function Author() {
             <code>front</code>, <code>back</code>
           </li>
           <li>
+            <code>video</code> — <code>provider</code> (<code>youtube</code> /{' '}
+            <code>file</code>), <code>src</code> (id/URL, <code>""</code> = coming
+            soon); optional <code>credit</code>, <code>chapters[]</code>,{' '}
+            <code>body</code>
+          </li>
+          <li>
             <code>interactive</code> — <code>widget</code> key (see Sandbox for
             available keys)
           </li>

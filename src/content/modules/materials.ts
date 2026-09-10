@@ -37,6 +37,22 @@ Every filament is a compromise between these. The next lessons cover the four yo
       ],
     },
     {
+      id: 'video-material-comparison',
+      title: 'Watch: PLA vs. PETG vs. ASA Compared',
+      summary: 'A side-by-side test of the three materials on price, printability and strength.',
+      estMinutes: 15,
+      type: 'video',
+      provider: 'youtube',
+      src: 'ycGDR752fT0',
+      credit: 'Thomas Sanladerer (feat. Josef Prusa)',
+      intro:
+        'A hands-on comparison of the materials you will actually choose between. Watch it, then the written lessons give you the specific temperatures and quirks.',
+      keyTakeaways: [
+        'There is no single "best" filament — each wins in different categories.',
+        'Printability and strength often pull in opposite directions.',
+      ],
+    },
+    {
       id: 'pla',
       title: 'PLA — The Default',
       summary: 'Easy to print, stiff, low heat resistance, slightly brittle.',

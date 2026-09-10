@@ -34,6 +34,22 @@ Almost everything you tune is a trade between **time, strength, and appearance**
       ],
     },
     {
+      id: 'video-slicer-defaults',
+      title: 'Watch: Slicer Settings That Matter Most',
+      summary: 'Which default settings an experienced user changes first, and why.',
+      estMinutes: 12,
+      type: 'video',
+      provider: 'youtube',
+      src: 'mE521Q4H6aY',
+      credit: "Maker's Muse — 3DP101",
+      intro:
+        'A quick orientation to the settings that move the needle. The lessons and the simulator that follow go deeper on each one.',
+      keyTakeaways: [
+        'A handful of settings account for most of the quality and time differences.',
+        'Defaults are a safe starting point, not an optimum.',
+      ],
+    },
+    {
       id: 'layer-height',
       title: 'Layer Height',
       summary: 'Interactive: see time, strength, and finish move as you change it.',

@@ -53,10 +53,29 @@ A module is a JSON object with an ordered `lessons[]`. Lesson `type` is one of:
 | type          | payload                                                            |
 | ------------- | ----------------------------------------------------------------- |
 | `reading`     | `body` (markdown), optional `widget`, `keyTakeaways[]`            |
+| `video`       | `provider` (`youtube` \| `file`), `src` (id/URL; `""` = "coming soon"), optional `credit`, `chapters[]`, `body`, `keyTakeaways[]` |
 | `quiz`        | `questions[]` (`prompt`, `options[]`, `answer` index, `explanation`), optional `passScore` |
 | `flashcards`  | `cards[]` (`front`, `back`) — flow into the spaced-repetition queue |
 | `interactive` | `widget` key (see the Sandbox for available keys)                 |
 | `checklist`   | `items[]` (`text`, optional `detail`)                             |
+
+### Video lessons
+
+`provider: 'youtube'` embeds via `youtube-nocookie.com` (privacy mode); `src`
+takes a bare id, a `youtu.be/…`, `watch?v=…`, `/embed/…` or `/shorts/…` URL.
+`provider: 'file'` plays a direct `.mp4`/`.webm` URL (host it yourself — e.g. an
+`assets/` path, S3, Cloudflare R2). A `"Watch on YouTube ↗"` link always shows
+as a fallback in case the uploader disabled embedding. Completion is a manual
+**"Mark as watched"** button (40 XP).
+
+**The seeded YouTube videos are curated starting picks — review them before any
+public launch.** Confirmed on-topic: Fundamentals (`T-Z3GmM20JM`, Thomas
+Sanladerer), Materials (`ycGDR752fT0`, Thomas Sanladerer), First Layer
+(`Ze36SX1xzOE`, Teaching Tech). Chosen from search, creator not fully verified:
+Slicer (`mE521Q4H6aY`), Troubleshooting (`YPAXeBuq9qU`), DfAM (`2_nVzoHC9YM`).
+Swap any of them in the **Author** tab or the module file — it's a one-line
+change. For original Future Makers Academy videos, switch to
+`provider: 'file'`.
 
 Author a module in the **Author** tab (it validates and previews), or drop a
 new file in `src/content/modules/` and add it to `builtinCurriculum` in

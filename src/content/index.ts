@@ -196,6 +196,7 @@ export interface ParseResult {
 
 const LESSON_TYPES = [
   'reading',
+  'video',
   'quiz',
   'flashcards',
   'interactive',
@@ -237,6 +238,14 @@ export function parseModule(raw: unknown): ParseResult {
       }
       if (L.type === 'reading' && typeof L.body !== 'string') {
         push(`${at}: reading lessons need a \`body\` string (markdown).`)
+      }
+      if (L.type === 'video') {
+        if (L.provider !== 'youtube' && L.provider !== 'file') {
+          push(`${at}: video lessons need \`provider\`: "youtube" or "file".`)
+        }
+        if (typeof L.src !== 'string') {
+          push(`${at}: video lessons need a \`src\` string (id/URL; "" = coming soon).`)
+        }
       }
       if (L.type === 'quiz') {
         if (!Array.isArray(L.questions) || L.questions.length === 0) {

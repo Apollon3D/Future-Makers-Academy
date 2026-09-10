@@ -8,6 +8,7 @@
 
 export type LessonType =
   | 'reading'
+  | 'video'
   | 'quiz'
   | 'flashcards'
   | 'interactive'
@@ -55,6 +56,29 @@ export interface ReadingLesson extends BaseLesson {
   keyTakeaways?: string[]
 }
 
+export interface VideoChapter {
+  /** "m:ss" or "h:mm:ss" — display only (and a seek target for self-hosted). */
+  time: string
+  label: string
+}
+
+export interface VideoLesson extends BaseLesson {
+  type: 'video'
+  /** 'youtube' embeds by id/URL; 'file' plays a direct MP4/WebM URL. */
+  provider: 'youtube' | 'file'
+  /** YouTube video id or full URL, or a direct video file URL. Empty = "coming soon". */
+  src: string
+  /** Creator / attribution shown under the player. */
+  credit?: string
+  /** Where to watch if the embed is blocked (auto-derived for YouTube). */
+  externalUrl?: string
+  intro?: string
+  /** Markdown notes / transcript shown below the video. */
+  body?: string
+  chapters?: VideoChapter[]
+  keyTakeaways?: string[]
+}
+
 export interface QuizLesson extends BaseLesson {
   type: 'quiz'
   intro?: string
@@ -85,6 +109,7 @@ export interface ChecklistLesson extends BaseLesson {
 
 export type Lesson =
   | ReadingLesson
+  | VideoLesson
   | QuizLesson
   | FlashcardLesson
   | InteractiveLesson

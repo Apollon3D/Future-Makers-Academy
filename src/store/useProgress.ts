@@ -234,6 +234,7 @@ export const useProgress = create<ProgressState>()(
 /** XP awarded for completing each lesson type. */
 export const XP_BY_TYPE: Record<string, number> = {
   reading: 40,
+  video: 40,
   quiz: 60,
   flashcards: 30,
   interactive: 45,

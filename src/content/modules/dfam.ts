@@ -36,6 +36,21 @@ The strongest orientation often needs the most support or puts the ugly seam on 
       ],
     },
     {
+      id: 'video-design-tips',
+      title: 'Watch: Designing the Best 3D Printed Parts',
+      summary: 'A tour of design-for-FDM tips: orientation, overhangs, tolerances, and more.',
+      estMinutes: 14,
+      type: 'video',
+      provider: 'youtube',
+      src: '2_nVzoHC9YM',
+      intro:
+        'An overview of the design habits this module unpacks one by one. Watch it first for the big picture, then work through the lessons.',
+      keyTakeaways: [
+        'Orientation is decided before you slice — it drives strength, supports and finish.',
+        'Most forced overhangs can be designed away with chamfers and teardrops.',
+      ],
+    },
+    {
       id: 'overhangs',
       title: 'The 45° Rule & Overhangs',
       summary: 'Interactive: sweep the overhang angle and watch it fail.',

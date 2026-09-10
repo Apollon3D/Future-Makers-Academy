@@ -12,6 +12,7 @@ import type { LessonType } from '../types'
 
 const TYPE_GLYPH: Record<LessonType, string> = {
   reading: '¶',
+  video: '▶',
   quiz: '?',
   flashcards: '⚏',
   interactive: '⚙',
