@@ -189,7 +189,7 @@ Sealed box or bag with **desiccant**, ideally with a humidity indicator. Printin
       type: 'interactive',
       widget: 'material-picker',
       intro:
-        'Tell the tool what you are building and what constraints matter. It weighs strength, heat, outdoor exposure, flexibility, detail, and ease of printing, then ranks PLA, PETG, TPU, and ASA for your case.',
+        'Tell the tool what the part must do and what your printer can handle. It weighs your requirements against every common FDM filament — standard, engineering, flexible, composite and specialty — and ranks them. The second tab is a full reference of all of them with temperatures and trade-offs.',
     },
     {
       id: 'check-materials',

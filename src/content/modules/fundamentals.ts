@@ -109,7 +109,7 @@ A small board with a microcontroller reads **G-code** — a text list of movemen
       type: 'interactive',
       widget: 'axis-visualizer',
       intro:
-        'FDM printers work in a Cartesian coordinate system. X and Y position the nozzle over the bed; Z sets the layer height. Drag the sliders and watch how the nozzle and the growing part respond.',
+        'FDM printers work in a Cartesian coordinate system. Press Print and watch the nozzle trace one layer’s toolpath in X and Y, then step up in Z for the next. Scrub the layer slider to jump around the build.',
       body: `Notice that **Z only ever increases** during a normal print — the machine finishes an entire layer in X/Y before stepping up. The height of that step is your **layer height**, the single setting that most affects both print time and surface finish.`,
     },
     {

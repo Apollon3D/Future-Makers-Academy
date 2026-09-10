@@ -105,10 +105,20 @@ new file in `src/content/modules/` and add it to `builtinCurriculum` in
 
 ### Interactive widgets
 
-Registered in `src/components/widgets/index.ts`. Current set: `slicer-sim`,
-`axis-visualizer`, `material-picker`, `infill-compare`, `z-offset`,
-`overhang-dial`. Add a component + registry entry and it's usable from any
-`interactive` lesson and appears in the Sandbox.
+Registered in `src/components/widgets/index.ts`. Add a component + registry
+entry and it's usable from any `interactive` lesson and appears in the Sandbox.
+
+- `slicer-sim` — 5 sliders (layer/infill/walls/speed/temp) → time, strength,
+  quality, stringing, filament, with a live cutaway + stair-stepping strip
+- `axis-visualizer` — the nozzle animates through each layer's toolpath in
+  top + side views; Z steps between layers; X/Y/Z readout
+- `material-picker` — requirement questionnaire + printer capability toggles →
+  ranked pick from `src/content/filaments.ts` (27 filaments); second tab is the
+  full reference with per-axis scores and temps
+- `infill-compare` — pick any two of nine patterns at one density (density adds
+  lines, not zoom); strength/speed/material bars per pattern
+- `z-offset` — first-layer squish in cross-section and top-down, with a verdict
+- `overhang-dial` — overhang angle vs. printed-surface quality
 
 ## Built-in curriculum (v1)
 

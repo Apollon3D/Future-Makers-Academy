@@ -21,28 +21,31 @@ export const WIDGETS: Record<string, WidgetMeta> = {
     component: SlicerSim,
     title: 'Slicer Simulator',
     description:
-      'Move layer height, infill, speed and walls; watch print time, strength and quality trade off.',
+      'Layer height, infill, walls, speed and temperature vs. print time, strength, quality and stringing — with a live cutaway of the part.',
   },
   'axis-visualizer': {
     component: AxisVisualizer,
-    title: 'Coordinate System',
-    description: 'Drive a virtual print head through X, Y and Z over the bed.',
+    title: 'Coordinate System & Layers',
+    description:
+      'Watch the nozzle trace each layer’s toolpath in X/Y, then step up in Z — a real print building, top and side views.',
   },
   'material-picker': {
     component: MaterialPicker,
     title: 'Material Selector',
     description:
-      'Answer a few questions about your part and get a ranked filament recommendation.',
+      'Describe your part and printer, get a ranked filament pick — plus a full reference of every common FDM filament.',
   },
   'infill-compare': {
     component: InfillCompare,
-    title: 'Infill Pattern Comparison',
-    description: 'Grid vs. gyroid, and how each behaves under different loads.',
+    title: 'Infill Explorer',
+    description:
+      'Compare any two of nine infill patterns at a chosen density, with strength, speed and material trade-offs.',
   },
   'z-offset': {
     component: ZOffset,
     title: 'First-Layer Squish',
-    description: 'See how the nozzle gap changes bead shape and adhesion.',
+    description:
+      'How the Z-offset changes the first-layer lines — in cross-section and as they look on the bed.',
   },
   'overhang-dial': {
     component: OverhangDial,
