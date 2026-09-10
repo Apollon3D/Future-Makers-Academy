@@ -27,6 +27,7 @@ src/
     modules/*.ts            one Module per file (6 built-in, FDM-focused)
     index.ts               aggregation + progress/unlock helpers + JSON validator
     useCurriculum.ts       merges built-in modules with in-app authored ones
+    workshop.ts            printers + shared part library for the Workshop
   store/useProgress.ts     Zustand store: completions, XP, streak, time,
                            spaced-repetition schedules, printer profile, theme.
                            Persisted to localStorage.
@@ -41,10 +42,31 @@ src/
     Pathway                gamified vertical skill tree with prerequisite locks
     LessonPlayer           distraction-free reader; renders any lesson type
     Review                 spaced-repetition session across all decks
+    Workshop / PrinterDetail  clickable printer schematics — per-part function,
+                           failure signs, and a maintenance log with due dates
     Sandbox                every widget, unlocked, for free exploration
     Author                 paste/validate/preview module JSON → add to the path
     Settings               printer profile, theme, reset progress
 ```
+
+## Workshop
+
+`src/content/workshop.ts` holds `PART_LIBRARY` (≈20 parts — each with how-it-works,
+failure symptoms, a maintenance schedule, and repair guidance, all universal to
+the part type) and `PRINTERS` (each machine composes a subset of parts, with
+per-model `note`s and a hotspot coordinate for its diagram).
+
+`src/components/PrinterDiagram.tsx` draws a schematic front elevation
+(`bedslinger` or `corexy`) with numbered, clickable hotspots. Maintenance
+completion is stored in the progress store as `maintenanceLog`
+(`${printerId}:${partId}:${taskIndex}` → epoch ms); "due" is derived from the
+task's interval.
+
+v1 printers: **Creality Ender-3 V2**, **Prusa MK4S** (both bed-slinger),
+**Bambu Lab P1S** (CoreXY). Model-specific facts are drawn from general
+knowledge — the UI links each machine's official manual and tells users to
+verify procedures there. Add a printer by appending to `PRINTERS`; add a part by
+adding to `PART_LIBRARY` and referencing it.
 
 ## Content model
 

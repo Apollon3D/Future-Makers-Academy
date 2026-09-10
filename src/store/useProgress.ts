@@ -42,6 +42,8 @@ interface ProgressState {
   lastLesson: LessonRef | null
   /** Modules added through the in-app authoring tool. */
   customModules: unknown[]
+  /** Workshop maintenance log: `${printerId}:${partId}:${taskIndex}` -> epoch ms last done. */
+  maintenanceLog: Record<string, number>
   /** Bumped whenever the learner does something meaningful (for effects). */
   activityNonce: number
 
@@ -60,6 +62,9 @@ interface ProgressState {
   ensureCards: (ids: string[]) => void
   reviewCard: (id: string, rating: 0 | 1 | 2 | 3) => void
   dueCardIds: (allIds: string[]) => string[]
+
+  logMaintenance: (key: string) => void
+  clearMaintenance: (key: string) => void
 
   setProfile: (patch: Partial<PrinterProfile>) => void
   setTheme: (theme: 'dark' | 'light') => void
@@ -108,6 +113,7 @@ export const useProgress = create<ProgressState>()(
       theme: 'dark',
       lastLesson: null,
       customModules: [],
+      maintenanceLog: {},
       activityNonce: 0,
 
       isLessonComplete: (key) => get().completedLessons.includes(key),
@@ -189,6 +195,20 @@ export const useProgress = create<ProgressState>()(
         })
       },
 
+      logMaintenance: (key) =>
+        set((s) => ({
+          maintenanceLog: { ...s.maintenanceLog, [key]: Date.now() },
+          streak: bumpStreak(s.streak),
+          activityNonce: s.activityNonce + 1,
+        })),
+
+      clearMaintenance: (key) =>
+        set((s) => {
+          const next = { ...s.maintenanceLog }
+          delete next[key]
+          return { maintenanceLog: next }
+        }),
+
       setProfile: (patch) =>
         set((s) => ({ profile: { ...s.profile, ...patch } })),
 
@@ -221,12 +241,18 @@ export const useProgress = create<ProgressState>()(
           timeSpentSec: 0,
           srs: {},
           lastLesson: null,
+          maintenanceLog: {},
           activityNonce: 0,
         }),
     }),
     {
       name: 'filament-academy-progress',
-      version: 1,
+      version: 2,
+      migrate: (persisted) => {
+        const s = (persisted ?? {}) as Record<string, unknown>
+        if (!s.maintenanceLog) s.maintenanceLog = {}
+        return s as unknown as ProgressState
+      },
     },
   ),
 )

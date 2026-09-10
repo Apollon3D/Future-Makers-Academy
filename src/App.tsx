@@ -17,6 +17,12 @@ const Review = lazy(() =>
 const Sandbox = lazy(() =>
   import('./pages/Sandbox').then((m) => ({ default: m.Sandbox })),
 )
+const Workshop = lazy(() =>
+  import('./pages/Workshop').then((m) => ({ default: m.Workshop })),
+)
+const PrinterDetail = lazy(() =>
+  import('./pages/PrinterDetail').then((m) => ({ default: m.PrinterDetail })),
+)
 const Author = lazy(() =>
   import('./pages/Author').then((m) => ({ default: m.Author })),
 )
@@ -128,6 +134,8 @@ function App() {
                 <Route path="/review" element={<Review />} />
                 <Route path="/sandbox" element={<Sandbox />} />
                 <Route path="/sandbox/:widgetKey" element={<Sandbox />} />
+                <Route path="/workshop" element={<Workshop />} />
+                <Route path="/workshop/:printerId" element={<PrinterDetail />} />
                 <Route path="/author" element={<Author />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="*" element={<NotFound />} />
