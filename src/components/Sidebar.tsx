@@ -12,6 +12,7 @@ const NAV = [
   { to: '/', label: 'Dashboard', icon: '◱', end: true },
   { to: '/pathway', label: 'Learning Path', icon: '⋔' },
   { to: '/review', label: 'Review', icon: '↻' },
+  { to: '/certificates', label: 'Certificates', icon: '🎓' },
   { to: '/workshop', label: 'Workshop', icon: '⚒' },
   { to: '/sandbox', label: 'Sandbox', icon: '⚙' },
   { to: '/author', label: 'Author', icon: '✎' },

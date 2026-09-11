@@ -5,6 +5,7 @@ export const fundamentals: Module = {
   title: 'FDM Fundamentals',
   blurb: 'How a filament printer turns a digital model into a physical object.',
   icon: '▦',
+  level: 'level-1',
   lessons: [
     {
       id: 'fdm-what',

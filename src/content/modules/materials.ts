@@ -5,6 +5,7 @@ export const materials: Module = {
   title: 'Filament & Materials',
   blurb: 'PLA, PETG, TPU, ABS/ASA — properties, printing behaviour, and how to choose.',
   icon: '❋',
+  level: 'level-1',
   requires: ['fundamentals'],
   lessons: [
     {

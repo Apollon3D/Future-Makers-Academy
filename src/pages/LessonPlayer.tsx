@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useProgress, XP_BY_TYPE } from '../store/useProgress'
 import { useCurriculum } from '../content/useCurriculum'
 import { getLesson, lessonKey, siblingLesson } from '../content'
+import { getLevel } from '../content/levels'
 import { Markdown } from '../lib/markdown'
 import { Badge, Button, Card, cn } from '../components/ui'
 import { WidgetHost } from '../components/WidgetHost'
@@ -20,6 +21,7 @@ export function LessonPlayer() {
     isLessonComplete,
     completeLesson,
     setLastLesson,
+    awardCertificate,
   } = useProgress()
 
   const found = useMemo(
@@ -31,12 +33,14 @@ export function LessonPlayer() {
 
   const [checklistReady, setChecklistReady] = useState(false)
   const [justEarned, setJustEarned] = useState<number | null>(null)
+  const [justCertifiedLevel, setJustCertifiedLevel] = useState<string | null>(null)
 
   const exists = Boolean(found)
   useEffect(() => {
     if (exists) setLastLesson({ moduleId, lessonId })
     setChecklistReady(false)
     setJustEarned(null)
+    setJustCertifiedLevel(null)
   }, [moduleId, lessonId, exists, setLastLesson])
 
   const next = useMemo(
@@ -209,6 +213,15 @@ export function LessonPlayer() {
                   if (r.passed && !done) {
                     completeLesson(key, XP_BY_TYPE.quiz)
                     setJustEarned(XP_BY_TYPE.quiz)
+                    // If this quiz is a level exam and it was the module's
+                    // last remaining lesson, the level is now certified.
+                    const otherLessonsDone = module.lessons
+                      .filter((l) => l.id !== lesson.id)
+                      .every((l) => completedLessons.includes(lessonKey(module.id, l.id)))
+                    if (module.isExam && module.level && otherLessonsDone) {
+                      awardCertificate(module.level)
+                      setJustCertifiedLevel(module.level)
+                    }
                   }
                 }}
               />
@@ -245,10 +258,25 @@ export function LessonPlayer() {
         </div>
 
         {/* Completion / navigation bar */}
-        {justEarned !== null && (
-          <div className="mt-6 animate-fade-rise rounded-lg border border-xp/40 bg-xp-soft px-4 py-3 text-sm text-xp">
-            +{justEarned} XP — lesson complete.
+        {justCertifiedLevel ? (
+          <div className="mt-6 animate-fade-rise rounded-lg border border-xp/40 bg-xp-soft px-4 py-4 text-sm">
+            <div className="text-base font-semibold text-ink">
+              🎓 Level passed — {getLevel(justCertifiedLevel)?.name} certified!
+            </div>
+            <p className="mt-1 text-text">
+              You earned the {getLevel(justCertifiedLevel)?.name} certificate.
+              {justEarned !== null && ` +${justEarned} XP too.`}
+            </p>
+            <Link to="/certificates">
+              <Button className="mt-3">View certificate →</Button>
+            </Link>
           </div>
+        ) : (
+          justEarned !== null && (
+            <div className="mt-6 animate-fade-rise rounded-lg border border-xp/40 bg-xp-soft px-4 py-3 text-sm text-xp">
+              +{justEarned} XP — lesson complete.
+            </div>
+          )
         )}
 
         <div className="mt-8 flex items-center justify-between gap-3 border-t border-border pt-5">

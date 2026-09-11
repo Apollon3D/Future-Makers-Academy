@@ -126,6 +126,10 @@ export interface Module {
   lessons: Lesson[]
   /** Module ids that must be completed before this one unlocks. */
   requires?: string[]
+  /** Which level (src/content/levels.ts) this module belongs to. */
+  level?: string
+  /** Marks this as a level's gating exam rather than a regular module. */
+  isExam?: boolean
 }
 
 export type Curriculum = Module[]

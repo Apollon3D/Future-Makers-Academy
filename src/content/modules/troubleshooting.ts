@@ -5,7 +5,8 @@ export const troubleshooting: Module = {
   title: 'Print Quality & Troubleshooting',
   blurb: 'A repeatable method for diagnosing failures, plus the usual suspects.',
   icon: '⚠',
-  requires: ['slicer', 'first-layer'],
+  level: 'level-2',
+  requires: ['level-1-exam', 'first-layer'],
   lessons: [
     {
       id: 'diagnostic-method',

@@ -24,6 +24,9 @@ const Sandbox = lazy(() =>
 const Workshop = lazy(() =>
   import('./pages/Workshop').then((m) => ({ default: m.Workshop })),
 )
+const Certificates = lazy(() =>
+  import('./pages/Certificates').then((m) => ({ default: m.Certificates })),
+)
 const PrinterDetail = lazy(() =>
   import('./pages/PrinterDetail').then((m) => ({ default: m.PrinterDetail })),
 )
@@ -43,6 +46,15 @@ function App() {
   const theme = useProgress((s) => s.theme)
   const activeProfileId = useAuth((s) => s.activeProfileId)
   const [hydrated, setHydrated] = useState(useAuth.persist.hasHydrated())
+  // Flips true only once syncActiveProfile() has actually run. AuthedApp must
+  // not mount before that: React fires a newly-mounted child's effects
+  // (e.g. AuthedApp's touchStreak) *before* this component's own effects in
+  // the same commit, so if AuthedApp mounted as soon as activeProfileId was
+  // known, touchStreak could write the still-default store back to this
+  // profile's storage slot before its real saved data was ever loaded —
+  // silently resetting it. Gating on this flag (rather than effect timing)
+  // makes the ordering explicit instead of relying on commit-order luck.
+  const [synced, setSynced] = useState(false)
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -53,12 +65,15 @@ function App() {
     return useAuth.persist.onFinishHydration(() => setHydrated(true))
   }, [hydrated])
 
-  // Once we know who (if anyone) is logged in, load their progress slot.
+  // Once we know who (if anyone) is logged in, load their progress slot —
+  // synchronously, before allowing anything downstream to render.
   useEffect(() => {
-    if (hydrated) syncActiveProfile()
-  }, [hydrated])
+    if (!hydrated) return
+    if (activeProfileId) syncActiveProfile()
+    setSynced(true)
+  }, [hydrated, activeProfileId])
 
-  if (!hydrated) return null
+  if (!hydrated || !synced) return null
   if (!activeProfileId) return <ProfileGate />
   return <AuthedApp />
 }
@@ -90,12 +105,15 @@ function AuthedApp() {
       if (document.visibilityState === 'visible') lastTick.current = Date.now()
       else flush()
     }
+    // Deliberately no 'beforeunload' flush: a store write triggered right at
+    // page teardown races the browser's actual unload — zustand's persist
+    // write can lose to it, silently dropping the write (we saw this corrupt
+    // more than just the time counter in testing). Losing the last few
+    // seconds of a session is a fine trade for never doing that.
     document.addEventListener('visibilitychange', onVisibility)
-    window.addEventListener('beforeunload', flush)
     return () => {
       window.clearInterval(id)
       document.removeEventListener('visibilitychange', onVisibility)
-      window.removeEventListener('beforeunload', flush)
     }
   }, [addTime])
 
@@ -160,6 +178,7 @@ function AuthedApp() {
                   element={<LessonPlayer />}
                 />
                 <Route path="/review" element={<Review />} />
+                <Route path="/certificates" element={<Certificates />} />
                 <Route path="/sandbox" element={<Sandbox />} />
                 <Route path="/sandbox/:widgetKey" element={<Sandbox />} />
                 <Route path="/workshop" element={<Workshop />} />

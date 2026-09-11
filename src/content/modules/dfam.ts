@@ -5,7 +5,8 @@ export const dfam: Module = {
   title: 'Design for FDM (DfAM)',
   blurb: 'Design parts that print well: orientation, overhangs, tolerances, and avoiding supports.',
   icon: '◈',
-  requires: ['slicer'],
+  level: 'level-3',
+  requires: ['level-2-exam'],
   lessons: [
     {
       id: 'anisotropy',

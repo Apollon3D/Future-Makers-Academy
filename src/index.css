@@ -184,3 +184,20 @@
 .animate-fade-rise {
   animation: fade-rise 0.28s ease-out both;
 }
+
+/* Printing a certificate: hide everything else on the page. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .certificate-print,
+  .certificate-print * {
+    visibility: visible;
+  }
+  .certificate-print {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    box-shadow: none !important;
+  }
+}

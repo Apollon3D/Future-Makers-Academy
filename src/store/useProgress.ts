@@ -30,6 +30,13 @@ export interface StreakState {
   lastActiveDay: string | null
 }
 
+export interface Certificate {
+  levelId: string
+  earnedAt: number
+  /** A display-only code, not a real verification mechanism (no server). */
+  serial: string
+}
+
 /** The persisted data shape — no actions. Reused as the default state and to
  *  rebuild a clean slate whenever the active student profile changes. */
 export interface ProgressData {
@@ -44,6 +51,8 @@ export interface ProgressData {
   lastLesson: LessonRef | null
   /** Workshop maintenance log: `${printerId}:${partId}:${taskIndex}` -> epoch ms last done. */
   maintenanceLog: Record<string, number>
+  /** Earned certificates, keyed by level id. */
+  certificates: Record<string, Certificate>
   /** Bumped whenever the learner does something meaningful (for effects). */
   activityNonce: number
 }
@@ -67,6 +76,9 @@ interface ProgressActions {
 
   logMaintenance: (key: string) => void
   clearMaintenance: (key: string) => void
+
+  /** Idempotent: awards once, first time called for a given level. */
+  awardCertificate: (levelId: string) => void
 
   setProfile: (patch: Partial<PrinterProfile>) => void
   setTheme: (theme: 'dark' | 'light') => void
@@ -99,6 +111,7 @@ export const DEFAULT_PROGRESS: ProgressData = {
   theme: 'dark',
   lastLesson: null,
   maintenanceLog: {},
+  certificates: {},
   activityNonce: 0,
 }
 
@@ -252,6 +265,20 @@ export const useProgress = create<ProgressState>()(
           return { maintenanceLog: next }
         }),
 
+      awardCertificate: (levelId) =>
+        set((s) => {
+          if (s.certificates[levelId]) return {}
+          const serial = `FMA-${levelId.toUpperCase()}-${Date.now().toString(36).toUpperCase()}`
+          return {
+            certificates: {
+              ...s.certificates,
+              [levelId]: { levelId, earnedAt: Date.now(), serial },
+            },
+            streak: bumpStreak(s.streak),
+            activityNonce: s.activityNonce + 1,
+          }
+        }),
+
       setProfile: (patch) =>
         set((s) => ({ profile: { ...s.profile, ...patch } })),
 
@@ -275,13 +302,20 @@ export const useProgress = create<ProgressState>()(
           srs: {},
           lastLesson: null,
           maintenanceLog: {},
+          certificates: {},
           activityNonce: 0,
         }),
     }),
     {
       name: PROGRESS_KEY_PREFIX,
-      version: 3,
+      version: 4,
       storage: createJSONStorage(() => profileScopedStorage),
+      // We hydrate manually (see store/session.ts) because the right storage
+      // slot depends on useAuth, which may not have hydrated itself yet at
+      // the moment this store is created. Letting persist auto-hydrate here
+      // races with that manual sync and can clobber it with stale/default
+      // data — skip it entirely and always go through session.ts instead.
+      skipHydration: true,
     },
   ),
 )

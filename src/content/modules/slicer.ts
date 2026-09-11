@@ -5,6 +5,7 @@ export const slicer: Module = {
   title: 'The Slicer',
   blurb: 'Where every real decision lives: layers, walls, infill, supports, speed, and G-code.',
   icon: '⌘',
+  level: 'level-1',
   requires: ['fundamentals'],
   lessons: [
     {

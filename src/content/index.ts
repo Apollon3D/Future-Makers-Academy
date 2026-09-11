@@ -8,18 +8,35 @@ import type {
 import { fundamentals } from './modules/fundamentals'
 import { materials } from './modules/materials'
 import { slicer } from './modules/slicer'
+import { level1Exam } from './modules/level-1-exam'
 import { firstLayer } from './modules/first-layer'
 import { troubleshooting } from './modules/troubleshooting'
+import { postProcessing } from './modules/post-processing'
+import { maintenanceCare } from './modules/maintenance-care'
+import { level2Exam } from './modules/level-2-exam'
 import { dfam } from './modules/dfam'
+import { advancedCalibration } from './modules/advanced-calibration'
+import { multiMaterial } from './modules/multi-material'
+import { level3Exam } from './modules/level-3-exam'
 
 /** The built-in starter curriculum, in intended learning order. */
 export const builtinCurriculum: Curriculum = [
+  // Level 1 — Foundations
   fundamentals,
   materials,
   slicer,
+  level1Exam,
+  // Level 2 — Practitioner
   firstLayer,
   troubleshooting,
+  postProcessing,
+  maintenanceCare,
+  level2Exam,
+  // Level 3 — Advanced Maker
   dfam,
+  advancedCalibration,
+  multiMaterial,
+  level3Exam,
 ]
 
 export function lessonKey(moduleId: string, lessonId: string): string {
@@ -114,6 +131,58 @@ export function isModuleUnlocked(
     const req = getModule(curr, reqId)
     return req ? moduleProgress(req, completed).complete : true
   })
+}
+
+// ---------------------------------------------------------------------------
+// Levels: a level is a group of modules (Module.level) gated by an exam
+// module (Module.isExam). See src/content/levels.ts for the level list.
+// ---------------------------------------------------------------------------
+
+export function modulesForLevel(curr: Curriculum, levelId: string): Module[] {
+  return curr.filter((m) => m.level === levelId)
+}
+
+export interface LevelProgressInfo {
+  done: number
+  total: number
+  pct: number
+  /** Every non-exam module in the level is complete. */
+  contentComplete: boolean
+  examModule?: Module
+  examPassed: boolean
+}
+
+export function levelProgress(
+  curr: Curriculum,
+  levelId: string,
+  completed: string[],
+): LevelProgressInfo {
+  const mods = modulesForLevel(curr, levelId)
+  const content = mods.filter((m) => !m.isExam)
+  const examModule = mods.find((m) => m.isExam)
+  const lessons = content.flatMap((m) => m.lessons.map((l) => lessonKey(m.id, l.id)))
+  const done = lessons.filter((k) => completed.includes(k)).length
+  return {
+    done,
+    total: lessons.length,
+    pct: lessons.length === 0 ? 0 : (done / lessons.length) * 100,
+    contentComplete: content.every((m) => moduleProgress(m, completed).complete),
+    examModule,
+    examPassed: examModule ? moduleProgress(examModule, completed).complete : false,
+  }
+}
+
+/** A level is unlocked once the previous level's exam has been passed. */
+export function isLevelUnlocked(
+  curr: Curriculum,
+  levelOrder: string[],
+  levelId: string,
+  completed: string[],
+): boolean {
+  const idx = levelOrder.indexOf(levelId)
+  if (idx <= 0) return true
+  const prevExam = modulesForLevel(curr, levelOrder[idx - 1]).find((m) => m.isExam)
+  return prevExam ? moduleProgress(prevExam, completed).complete : true
 }
 
 export function overallProgress(

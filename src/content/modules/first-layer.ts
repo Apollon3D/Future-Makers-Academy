@@ -5,7 +5,8 @@ export const firstLayer: Module = {
   title: 'Bed Adhesion & First Layer',
   blurb: 'The first 0.2 mm decides whether the next 10 hours succeed.',
   icon: '▂',
-  requires: ['slicer'],
+  level: 'level-2',
+  requires: ['level-1-exam'],
   lessons: [
     {
       id: 'why-first-layer',
