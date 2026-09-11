@@ -45,6 +45,7 @@ export type PartCategory =
   | 'bed'
   | 'electronics'
   | 'frame'
+  | 'accessory'
 
 export interface MaintenanceTask {
   interval: MaintenanceInterval
@@ -86,6 +87,7 @@ export const CATEGORY_LABEL: Record<PartCategory, string> = {
   bed: 'Bed & first layer',
   electronics: 'Electronics',
   frame: 'Frame',
+  accessory: 'Optional add-ons',
 }
 
 // ---------------------------------------------------------------------------
@@ -513,6 +515,61 @@ export const PART_LIBRARY: Record<string, PartInfo> = {
       credit: 'Photo: Tatár Lehel, CC BY-SA 3.0 / GFDL, via Wikimedia Commons',
     },
   },
+
+  'dual-nozzle-system': {
+    id: 'dual-nozzle-system',
+    name: 'Second, independent nozzle',
+    category: 'extrusion',
+    tagline: 'A fully separate hotend sharing the gantry, not swapping into it.',
+    how: `Some newer machines mount **two complete hotends** — each with its own heater, thermistor, cooling and drive gear — on the same X gantry, rather than one shared hotend fed by a multi-material unit. Firmware can run them at different temperatures for different materials (e.g. a soluble support on one, a structural material on the other), or hand off between them mid-layer. Whichever nozzle isn't printing is lifted or parked so it cannot drag through finished plastic — that parking height and X offset between the two nozzles is a factory-set calibration the printer checks itself.`,
+    symptoms: [
+      'A faint scrape or drag mark on top surfaces (the idle nozzle is parked too low)',
+      'A visible seam or Z-offset mismatch where the two nozzles hand off (their relative XYZ offset drifted)',
+      'One material bleeding into the other at a boundary (temperatures too close, or purge/wipe between nozzles skipped)',
+    ],
+    maintenance: [
+      { interval: 'monthly', task: 'Run the printer’s nozzle-alignment / offset calibration routine rather than eyeballing it' },
+      { interval: 'quarterly', task: 'Check both hotends independently for the usual heat-creep and cooling-fan wear signs' },
+    ],
+    repair: `Treat each hotend as its own unit for nozzle/heatbreak/fan service — the shared part is only the gantry and firmware coordination. After swapping either nozzle, re-run the offset calibration; skipping it reappears as a soft seam or Z mismatch on every dual-material print.`,
+  },
+
+  'laser-module': {
+    id: 'laser-module',
+    name: 'Laser engraving/cutting module (optional)',
+    category: 'accessory',
+    tagline: 'A bolt-on diode laser that turns the gantry into a 2D engraver/cutter.',
+    how: `A focused diode laser (rated in watts — higher power cuts thicker material, not just faster) mounted in place of, or alongside, the print head. Instead of extruding, the firmware moves the head across the material while pulsing or continuously firing the laser, engraving a raster/vector image or cutting through thin sheet stock. It needs the enclosure door interlock and any exhaust/fume filtration active — a laser is a genuine fire and eye-safety hazard, not a toy peripheral.`,
+    symptoms: [
+      'Engraving looks scorched/blurred at the edges (focus height wrong, or speed too slow for the power)',
+      'A cut doesn’t go all the way through (power too low, feed too fast, or multiple passes needed for the material thickness)',
+      'The module refuses to fire (door/enclosure interlock open, or the safety confirmation in the slicer/firmware not acknowledged)',
+    ],
+    maintenance: [
+      { interval: 'each-print', task: 'Confirm the work area is clear of scrap and the exhaust/filter is running before firing the laser' },
+      { interval: 'monthly', task: 'Clean the lens/protective window with an approved lens cloth — a hazy lens loses power and can overheat' },
+      { interval: 'quarterly', task: 'Check the door/enclosure interlock actually stops the laser when triggered — test it deliberately' },
+    ],
+    repair: `Never operate a laser module with the enclosure open, safety glasses off, or an interlock bypassed — that guidance is non-negotiable, not a house-rule. Focus height is normally set with a supplied gauge or an autofocus routine; a soft, spread-out line almost always means the focus drifted. Always test new material/power/speed combinations on scrap first — burn behaviour varies hugely by material and finish.`,
+  },
+
+  'toolchange-dock': {
+    id: 'toolchange-dock',
+    name: 'Toolhead dock & swap system',
+    category: 'extrusion',
+    tagline: 'Parks several complete, preheated toolheads and swaps between them in seconds.',
+    how: `Instead of one hotend fed by a multi-material unit (which still purges through a single nozzle), a toolchanger keeps **several complete toolheads** — each its own motor, hotend and cooling — parked in a dock at the edge of the build area, already at temperature. The gantry drives to the dock, releases the current toolhead, picks up the next, and confirms a precise mechanical lock before resuming — no shared nozzle to purge means far less waste on multi-material or multi-colour prints, at the cost of a hard limit on how many toolheads the dock can hold.`,
+    symptoms: [
+      'A visible offset or seam exactly at a colour/material change (toolhead pickup didn’t seat to the same precise position)',
+      'A weak, under-extruded first line right after a swap (that toolhead wasn’t fully back up to temperature before it started moving)',
+      'A failed or aborted swap (dock contacts or alignment pins dirty/obstructed, or a toolhead not parked squarely from the previous swap)',
+    ],
+    maintenance: [
+      { interval: 'monthly', task: 'Keep the dock’s alignment pins/contacts and each toolhead’s mating face free of dust and stray filament' },
+      { interval: 'quarterly', task: 'Run the printer’s toolhead-alignment calibration rather than assuming it still holds' },
+    ],
+    repair: `Most "random" seams on a toolchanger trace back to a dock that needs cleaning or an alignment calibration that was never re-run after a bump. Because every toolhead is a full hotend, treat each one's nozzle/heatbreak/fan as separate wear items — a jam or heat-creep problem is specific to whichever toolhead reports it, not the machine as a whole.`,
+  },
 }
 
 // ---------------------------------------------------------------------------
@@ -539,6 +596,9 @@ export interface Printer {
   manualUrl: string
   manualLabel: string
   parts: PrinterPartRef[]
+  /** A real, openly-licensed photo of the whole machine. Optional — omitted
+   *  rather than shown as a mismatched stand-in when no good match exists. */
+  photo?: PartPhoto
 }
 
 /** Bed-slinger hotspot coordinates (viewBox 0 0 440 400). */
@@ -583,6 +643,9 @@ const COREXY_HOTSPOTS: Record<string, { x: number; y: number }> = {
   psu: { x: 320, y: 372 },
   display: { x: 110, y: 360 },
   'filament-system': { x: 404, y: 60 },
+  'dual-nozzle-system': { x: 258, y: 140 },
+  'laser-module': { x: 262, y: 92 },
+  'toolchange-dock': { x: 350, y: 118 },
 }
 
 function refs(
@@ -657,6 +720,11 @@ export const PRINTERS: Printer[] = [
     ],
     manualUrl: 'https://help.prusa3d.com/category/mk4s_1057',
     manualLabel: 'Prusa Knowledge Base',
+    photo: {
+      url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Prusa_MK4.jpg?width=900',
+      credit: 'Photo: Majkluss, CC BY-SA 4.0, via Wikimedia Commons',
+      note: 'Shows the original Prusa MK4 — externally identical to the MK4S pictured here; the "S" revision changed the internal accelerometer and extruder firmware, not the enclosure.',
+    },
     parts: refs(BEDSLINGER_HOTSPOTS, [
       ['nozzle', 'High-flow "Prusa nozzle" — quick-swap on the MK4S revision. Still brass by default; hardened and larger sizes available.'],
       ['heater-block', 'Integrated into a modular hotend cartridge — the whole heater/thermistor unit swaps as a module, which makes field repair fast.'],
@@ -714,6 +782,249 @@ export const PRINTERS: Printer[] = [
       ['psu', 'Internal, in the base. Sized for the bed and motion; check the base compartment for dust at the yearly service.'],
       ['display', 'Small mono screen plus phone/cloud control. Most tuning happens in Bambu Studio or the app rather than on the machine.'],
       ['filament-system', 'External spool or AMS. The path into an enclosed CoreXY is long — a dry AMS or dry box matters more here, and the PTFE path segments should be checked for wear where they flex.'],
+    ]),
+  },
+
+  {
+    id: 'bambu-p2s',
+    name: 'P2S',
+    maker: 'Bambu Lab',
+    diagram: 'corexy',
+    year: '2025',
+    blurb:
+      'A ground-up re-engineering of the P1 line, launched October 2025: a new H2-series toolhead with a servo-driven direct-drive extruder and a quick-swap nozzle, plus a redesigned "Active Airflow" cooling path. Same enclosed CoreXY bones as the P1S underneath.',
+    specs: [
+      { label: 'Build volume', value: '256 × 256 × 256 mm' },
+      { label: 'Motion', value: 'CoreXY, enclosed' },
+      { label: 'Extruder', value: 'PMSM servo-driven direct drive ("DynaSense") — Bambu cites ~60% faster filament feed than the P1S' },
+      { label: 'Hotend', value: 'Hardened steel, quick-swap nozzle — 0.4 mm standard (0.2/0.6/0.8 mm available)' },
+      { label: 'Bed', value: 'Textured PEI plate, auto mesh, ~100 °C' },
+      { label: 'Extras', value: 'AMS 2 Pro compatible (Combo bundle), 5″ touchscreen, AI error detection, 1080p live view' },
+    ],
+    manualUrl: 'https://wiki.bambulab.com/en/p2s',
+    manualLabel: 'Bambu Lab Wiki',
+    parts: refs(COREXY_HOTSPOTS, [
+      ['corexy', 'Same crossed-belt layout as the P1S. If square test prints skew, match belt tension with a phone tuner app exactly as on the P1S.'],
+      ['nozzle', 'Hardened steel by default (not brass) and quick-swap — Bambu\'s new H2-series toolhead is a deliberate break from P1S/X1C/A1 toolheads and is not interchangeable with them.'],
+      ['heater-block', 'Part of the sealed H2-series hotend module — serviced as a unit, like the P1S, not as individual grub-screwed parts.'],
+      ['heatbreak', 'All-metal, integrated in the module. No PTFE liner to maintain.'],
+      ['heatsink-fan', 'Part of the redesigned "Active Airflow" cooling path Bambu introduced on this toolhead — inspect per the wiki teardown if heat-creep jams appear.'],
+      ['part-fan', 'Active Airflow also reshapes part-cooling delivery versus the P1S. Keep the duct and impeller clear of dust the same way.'],
+      ['extruder', 'PMSM servo-driven direct drive (DynaSense) rather than a simple stepper-driven gear set — Bambu\'s figure is roughly 60% faster filament feed, which shaves time off every filament change and AMS swap.'],
+      ['x-carriage', 'Rides the same gantry tube layout as the P1S. Wipe and re-lube lightly; grit here shows as ringing on both axes.'],
+      ['z-axis', 'Bed-as-Z-stage layout, same as the P1S. Keep the leadscrew(s) greased.'],
+      ['bed-probe', 'Automatic plate measurement before each print, as on the P1S. Wipe the nozzle first for a clean reading.'],
+      ['heated-bed', 'Textured PEI over the heater. Degrease weekly with IPA.'],
+      ['frame', 'Boxed, panelled CoreXY enclosure — same rigidity advantage as the P1S. Check panel clips and the door seal periodically.'],
+      ['mainboard', 'In the base behind a cover; largely sealed. Firmware updates over the network.'],
+      ['psu', 'Internal, in the base. Check the compartment for dust at the yearly service.'],
+      ['display', '5″ touchscreen with the "2nd-gen" UI Bambu introduced alongside this model, plus phone/cloud control.'],
+      ['filament-system', 'External spool or AMS 2 Pro (via the Combo bundle). A dry AMS or dry box matters for PETG/PA the same as on the P1S.'],
+    ]),
+  },
+
+  {
+    id: 'bambu-x1c',
+    name: 'X1 Carbon',
+    maker: 'Bambu Lab',
+    diagram: 'corexy',
+    year: '2023',
+    blurb:
+      'Bambu\'s original flagship: the P1S layout with a carbon-fibre gantry, an all-metal hotend to 300 °C, and — its signature feature — a Micro-LIDAR sensor that inspects the first layer and auto-calibrates flow per filament. Bambu announced end-of-life for the X1 series on 31 March 2026 (parts/service continuing to 2031), but the machine remains an excellent, thoroughly-documented teaching example.',
+    specs: [
+      { label: 'Build volume', value: '256 × 256 × 256 mm' },
+      { label: 'Motion', value: 'CoreXY, enclosed; carbon-fibre X gantry' },
+      { label: 'Extruder', value: 'Direct drive, dual-gear' },
+      { label: 'Hotend', value: 'All-metal, hardened steel nozzle 0.4 mm, up to ~300 °C' },
+      { label: 'Sensing', value: 'Micro-LIDAR — first-layer height inspection + automatic per-filament flow calibration' },
+      { label: 'AMS', value: 'Up to 4 AMS units chained (16 filaments total)' },
+      { label: 'Display', value: '5″ 1280×720 touchscreen, Wi-Fi' },
+      { label: 'Size / weight', value: '389 × 389 × 457 mm, 14.13 kg' },
+    ],
+    manualUrl: 'https://wiki.bambulab.com/en/x1',
+    manualLabel: 'Bambu Lab Wiki',
+    photo: {
+      url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Bambu_Lab_X1_Carbon_with_AMS_module.jpg?width=900',
+      credit: 'Photo: Benlisquare, CC BY-SA 4.0 / GFDL, via Wikimedia Commons',
+      note: 'Shown with an AMS unit stacked on top, as most owners run it.',
+    },
+    parts: refs(COREXY_HOTSPOTS, [
+      ['corexy', 'Two belts cross the machine. If square test prints come out as parallelograms, they are at unequal tension — match their pitch with a phone tuner app.'],
+      ['nozzle', 'All-metal, quick-swap assembly, hardened steel standard on this model. The Micro-LIDAR (see bed-probe) checks flow through this exact nozzle after any swap.'],
+      ['heater-block', 'Part of the combined hotend module — replace the whole module rather than individual grub-screwed parts.'],
+      ['heatbreak', 'All-metal, integrated in the module. No PTFE liner maintenance.'],
+      ['heatsink-fan', 'Inside the toolhead shroud. Follow the wiki teardown; the internal cables are short.'],
+      ['part-fan', 'Toolhead blower plus a chamber-mounted auxiliary fan for fast PLA. Keep both impellers clear of dust.'],
+      ['extruder', 'Compact dual-gear direct drive. A filament cutter trims the tip on every AMS filament change — check it stays sharp.'],
+      ['x-carriage', 'Rides the carbon-fibre X gantry tube — lighter and stiffer than an aluminium equivalent, which is part of how this machine holds speed without ringing.'],
+      ['z-axis', 'The whole bed is the Z stage, carried on a leadscrew from a single motor. Keep it greased.'],
+      ['bed-probe', 'The signature feature: a Micro-LIDAR module scans the first layer as it prints and flags problems live, and separately auto-calibrates flow rate for each new filament by scanning a test pattern — a genuinely different approach from the strain-gauge/inductive probes on the other machines in this Workshop.'],
+      ['heated-bed', 'Textured PEI on spring steel. Degrease weekly with IPA. The enclosure helps ABS/ASA but also traps heat for PLA — use the aux fan and vent the top for PLA-heavy queues.'],
+      ['frame', 'Boxed, panelled CoreXY frame — the stiffest layout in this Workshop, letting it hold high acceleration without ringing. Check panel clips and the door seal.'],
+      ['mainboard', 'In the base behind a cover; largely sealed. Firmware/AMS updates come over the network.'],
+      ['psu', 'Internal, in the base. Check the compartment for dust at the yearly service.'],
+      ['display', '5″ colour touchscreen plus phone/cloud control via Bambu Studio and the Handy app.'],
+      ['filament-system', 'External spool or up to 4 chained AMS units. The enclosed path is long — dry filament (or a dried AMS) matters more here than on an open-frame printer.'],
+    ]),
+  },
+
+  {
+    id: 'bambu-x1e',
+    name: 'X1E',
+    maker: 'Bambu Lab',
+    diagram: 'corexy',
+    year: '2023',
+    blurb:
+      'The engineering-grade sibling of the X1 Carbon, released the same year: identical core hardware plus an actively heated chamber built specifically to keep engineering filaments (PA, PC, ABS/ASA) from warping. Also reached end-of-life on 31 March 2026 alongside the rest of the X1 series.',
+    specs: [
+      { label: 'Build volume', value: '256 × 256 × 256 mm' },
+      { label: 'Motion', value: 'CoreXY, enclosed; carbon-fibre X gantry — same platform as the X1 Carbon' },
+      { label: 'Chamber', value: 'Actively heated: a 100 W heater + thermocouple, PID-controlled to ~60 °C (roughly ±3 °C during hotend heat-up, tighter once settled)' },
+      { label: 'Hotend', value: 'All-metal, hardened steel nozzle 0.4 mm — some reviewers report a higher practical ceiling (~320 °C) than the X1 Carbon\'s ~300 °C; treat exact figures as manual-dependent' },
+      { label: 'Sensing', value: 'Micro-LIDAR — same first-layer/flow-calibration system as the X1 Carbon' },
+      { label: 'Target use', value: 'Engineering materials (nylon/PA, PC, ABS, ASA) that warp badly in an unheated or passively-heated chamber' },
+    ],
+    manualUrl: 'https://wiki.bambulab.com/en/x1',
+    manualLabel: 'Bambu Lab Wiki',
+    photo: {
+      url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Bambu_Lab_X1_Carbon_with_AMS_module.jpg?width=900',
+      credit: 'Photo: Benlisquare, CC BY-SA 4.0 / GFDL, via Wikimedia Commons',
+      note: 'Shows the visually identical X1 Carbon — the X1E shares the same enclosure and gantry; the difference is an added active chamber heater, which is not visible from the outside.',
+    },
+    parts: refs(COREXY_HOTSPOTS, [
+      ['corexy', 'Identical crossed-belt system to the X1 Carbon — same tensioning approach.'],
+      ['nozzle', 'All-metal, hardened steel. Engineering filaments (PA, PC) are more abrasive and higher-temperature than PLA/PETG; treat the nozzle as a wear item on this machine sooner than on a PLA-focused printer.'],
+      ['heater-block', 'Combined hotend module, replaced as a unit — same design as the X1 Carbon.'],
+      ['heatbreak', 'All-metal, integrated. No PTFE to maintain (important, since PTFE degrades fast at the temperatures this machine is built for).'],
+      ['heatsink-fan', 'Inside the toolhead shroud, same as the X1 Carbon.'],
+      ['part-fan', 'Often run lower than on the X1 Carbon — engineering filaments like ABS/ASA/PC generally want less aggressive part cooling than PLA.'],
+      ['extruder', 'Compact dual-gear direct drive, same as the X1 Carbon.'],
+      ['x-carriage', 'Carbon-fibre X gantry tube, same as the X1 Carbon.'],
+      ['z-axis', 'Single-motor leadscrew Z stage, same as the X1 Carbon.'],
+      ['bed-probe', 'Same Micro-LIDAR first-layer inspection and flow auto-calibration as the X1 Carbon — important here since engineering filaments are more failure-prone on a bad first layer.'],
+      ['heated-bed', 'Textured PEI. The real story on this machine is the chamber, not the bed: the active 100 W heater keeps ambient air warm enough that PA/PC/ABS parts cool slowly and evenly instead of warping off the plate mid-print.'],
+      ['frame', 'Same boxed, panelled CoreXY enclosure as the X1 Carbon, but sealed to hold heat for the active chamber system — check the door seal condition more often, since a leak here is both a print-quality and an efficiency issue.'],
+      ['mainboard', 'In the base, sealed. The chamber heater\'s PID loop runs here alongside the usual thermal-runaway protection.'],
+      ['psu', 'Internal, sized to also run the chamber heater — a larger continuous load than the X1 Carbon\'s PSU carries.'],
+      ['display', '5″ colour touchscreen plus phone/cloud control.'],
+      ['filament-system', 'External spool or AMS. Engineering filaments are especially moisture-sensitive — a dry box or dried AMS matters more here than on any other printer in this Workshop.'],
+    ]),
+  },
+
+  {
+    id: 'bambu-h2d',
+    name: 'H2D',
+    maker: 'Bambu Lab',
+    diagram: 'corexy',
+    year: '2025',
+    blurb:
+      'Announced March 2025 and shipping from June 2025, the H2D is Bambu\'s largest and most versatile machine: a bigger CoreXY with two genuinely independent nozzles that can run different materials or temperatures, an actively heated chamber, and an optional bolt-on laser module that turns it into an engraver/cutter. The exact mechanism the two nozzles use to avoid colliding is Bambu\'s own design and not something to guess at — check the wiki teardown rather than assuming it works like a simple IDEX printer.',
+    specs: [
+      { label: 'Build volume', value: '350 × 320 × 325 mm (single-nozzle mode) / 300 × 320 × 325 mm (dual-nozzle mode)' },
+      { label: 'Toolhead', value: 'Two independent nozzles — can print concurrently in different materials/temperatures, or one model + one support material' },
+      { label: 'Hotend', value: 'High-flow, up to ~350 °C, rated to ~600 mm/s' },
+      { label: 'Chamber', value: 'Actively heated to ~65 °C for engineering filaments' },
+      { label: 'Accuracy', value: 'Bambu cites ~50 µm motion accuracy' },
+      { label: 'Optional', value: '10 W or 40 W laser module for engraving/cutting (sold as a Laser Combo)' },
+    ],
+    manualUrl: 'https://wiki.bambulab.com/en/h2/manual/h2d-intro',
+    manualLabel: 'Bambu Lab Wiki',
+    parts: refs(COREXY_HOTSPOTS, [
+      ['corexy', 'Same crossed-belt principle as every CoreXY in this Workshop, on a larger frame to reach the bigger build volume.'],
+      ['nozzle', 'The primary nozzle. High-flow, rated hotter (~350 °C) and faster (~600 mm/s) than the X1-series hotend — matched to Bambu\'s higher-throughput ambitions for this machine.'],
+      ['dual-nozzle-system', 'The second nozzle is a complete, independent hotend on the same gantry — not a shared nozzle fed by an AMS-style changer. See its own entry for how the two coordinate and what goes wrong when they don\'t.'],
+      ['heater-block', 'Part of each sealed hotend module — there are two of these on this machine, one per nozzle.'],
+      ['heatbreak', 'All-metal, integrated per hotend module.'],
+      ['heatsink-fan', 'One per hotend — check whichever nozzle is reporting a heat-creep jam, not the other.'],
+      ['part-fan', 'Cooling has to work for two independently-controlled hotends; expect the duct/airflow design to differ meaningfully from a single-nozzle machine — follow the wiki rather than assuming symmetry.'],
+      ['extruder', 'Each nozzle has its own drive gears. A grinding sound traces to a specific side\'s extruder, not "the extruder" generically on this machine.'],
+      ['laser-module', 'A genuinely optional accessory (10 W or 40 W, sold in the Laser Combo) that turns the H2D into an engraver/cutter. Not present unless purchased and installed — treat it as a distinct tool with its own safety requirements, not an extension of the print head.'],
+      ['x-carriage', 'Carries both hotends (and the laser module, if fitted) along the X gantry.'],
+      ['z-axis', 'Bed-as-Z-stage, scaled up for the larger build volume.'],
+      ['bed-probe', 'Automatic plate measurement before each print, as on the X1/P-series.'],
+      ['heated-bed', 'Larger plate for the bigger build volume; textured PEI, degrease weekly with IPA.'],
+      ['frame', 'Sealed, actively-heated enclosure (~65 °C) for engineering filaments — the largest of the Bambu chambers in this Workshop. Check the door seal; a heated chamber leaking heat both wastes energy and lets warp-prone material cool unevenly.'],
+      ['mainboard', 'In the base; now coordinating two hotends plus the chamber heater and, optionally, the laser — firmware complexity here is genuinely higher than a single-nozzle machine.'],
+      ['psu', 'Sized for two hotends, a large heated bed, and an active chamber heater — the highest continuous load of any printer in this Workshop.'],
+      ['display', 'Colour touchscreen plus phone/cloud control.'],
+      ['filament-system', 'External spool or AMS, effectively doubled since each nozzle can be fed independently. Dry filament matters as much as on the X1E, for the same engineering-material reasons.'],
+    ]),
+  },
+
+  {
+    id: 'snapmaker-u1',
+    name: 'U1',
+    maker: 'Snapmaker',
+    diagram: 'corexy',
+    year: '2026',
+    blurb:
+      'A CoreXY toolchanger, not a shared-nozzle multi-material printer: four independent, preheated toolheads ("SnapSwap") dock at the side of the machine and swap in about 5 seconds with no purge tower needed. Funded on Kickstarter in August 2025 (over $7M pledged in 24 hours) and launched at retail on 10 April 2026. The four-toolhead dock is a hard architectural limit — there is no expansion path to more.',
+    specs: [
+      { label: 'Build volume', value: '270 × 270 × 270 mm' },
+      { label: 'Motion', value: 'CoreXY base' },
+      { label: 'Toolheads', value: '4 independent, preheated toolheads via the SnapSwap dock — swap in ~5 s, no purge' },
+      { label: 'Alignment', value: 'Snapmaker cites <0.04 mm inter-head alignment' },
+      { label: 'Bed', value: 'Textured PEI flexible plate, automatic leveling' },
+      { label: 'Speed', value: 'Up to 500 mm/s, 20,000 mm/s² acceleration' },
+    ],
+    manualUrl: 'https://wiki.snapmaker.com/en/snapmaker_u1',
+    manualLabel: 'Snapmaker Wiki',
+    parts: refs(COREXY_HOTSPOTS, [
+      ['corexy', 'CoreXY motion base, sized for the toolchanging dock at the side.'],
+      ['toolchange-dock', 'The defining feature of this machine: four complete, independently preheated toolheads parked in a dock, swapped in about 5 seconds. This replaces the "extruder" and "nozzle" concept as a single shared part — see its own entry for how the swap works and what to check when it misbehaves.'],
+      ['nozzle', 'Each of the four toolheads carries its own nozzle. A print using several colours cycles through several of these independently-heated nozzles rather than pushing several filaments through one.'],
+      ['heater-block', 'One per toolhead — four in total, each serviced independently.'],
+      ['heatbreak', 'One per toolhead.'],
+      ['heatsink-fan', 'One per toolhead. A jam traces to a specific toolhead\'s fan, not a shared one.'],
+      ['part-fan', 'One per toolhead, following whichever head is currently mounted on the gantry.'],
+      ['extruder', 'Integrated into each toolhead rather than shared — direct drive on each of the four.'],
+      ['x-carriage', 'Picks up and releases whichever toolhead is active from the dock.'],
+      ['z-axis', 'Bed-as-Z-stage on the CoreXY base.'],
+      ['bed-probe', 'Automatic bed leveling before printing.'],
+      ['heated-bed', 'Textured PEI flexible plate — flex to release parts rather than prying.'],
+      ['frame', 'CoreXY frame sized to also carry the four-head dock at the side; check that the dock itself is bolted solid, since head-swap accuracy depends on the dock not moving relative to the gantry.'],
+      ['mainboard', 'Coordinates the CoreXY motion, the dock pickup sequence, and four independently-heated toolheads simultaneously.'],
+      ['psu', 'Sized to keep up to four toolheads pre-heated on standby plus the bed — a materially different, higher continuous load than a single-nozzle machine.'],
+      ['display', 'Touchscreen plus app/cloud control (Snapmaker Orca-based slicing).'],
+      ['filament-system', 'Up to four independent spools, one per toolhead — a genuinely different filament-management story from an AMS/MMU feeding one shared nozzle.'],
+    ]),
+  },
+
+  {
+    id: 'elegoo-centauri-carbon',
+    name: 'Centauri Carbon',
+    maker: 'Elegoo',
+    diagram: 'corexy',
+    year: '2025',
+    blurb:
+      'Elegoo\'s first serious CoreXY FDM printer (Elegoo is best known for resin printers), shipping from 31 May 2025: a fully enclosed steel-and-glass chassis with dual independently-driven X/Y motors, a chamber camera, and automated calibration aimed squarely at Bambu/Creality\'s enclosed-CoreXY price bracket.',
+    specs: [
+      { label: 'Build volume', value: '256 × 256 × 256 mm' },
+      { label: 'Motion', value: 'CoreXY, fully enclosed (steel chassis + aluminium/glass shell)' },
+      { label: 'Drive', value: 'Dual 42-40 (NEMA 17-class) stepper motors independently driving X and Y, on metal linear guide rods' },
+      { label: 'Hotend', value: 'Hardened steel nozzle, up to ~320 °C' },
+      { label: 'Speed', value: 'Up to 500 mm/s, 20,000 mm/s² acceleration' },
+      { label: 'Extras', value: 'Automated calibration routine, built-in chamber camera' },
+    ],
+    manualUrl: 'https://wiki.elegoo.com/Centauri-carbon',
+    manualLabel: 'Elegoo Wiki',
+    parts: refs(COREXY_HOTSPOTS, [
+      ['corexy', 'Two crossed belts, each driven by its own independent stepper — Elegoo\'s pitch is that independent X/Y drive (rather than one motor per belt loop sharing a single axis concept) simplifies tuning tension per side.'],
+      ['nozzle', 'Hardened steel standard, rated hotter (~320 °C) than a budget brass-nozzle machine — suitable for mildly abrasive filaments without a separate upgrade.'],
+      ['heater-block', 'Standard heater/thermistor arrangement inside the enclosed toolhead shroud.'],
+      ['heatbreak', 'All-metal on this platform — check the wiki before assuming a PTFE liner is present.'],
+      ['heatsink-fan', 'Inside the toolhead shroud; follow the manufacturer teardown to access it.'],
+      ['part-fan', 'Enclosed-chamber part cooling — expect to need less aggressive cooling settings for ABS/ASA than an open-frame printer, same principle as the Bambu machines in this Workshop.'],
+      ['extruder', 'Direct-drive extruder on the toolhead.'],
+      ['x-carriage', 'Rides linear guide rods on the X gantry.'],
+      ['z-axis', 'Bed-as-Z-stage, CoreXY layout.'],
+      ['bed-probe', 'Part of the automated calibration routine this machine advertises — run it rather than tramming by hand.'],
+      ['heated-bed', 'Enclosed chamber helps ABS/ASA the same way it does on the Bambu machines here. Degrease the plate weekly.'],
+      ['frame', 'Fully enclosed steel chassis with an aluminium/glass shell — check the door seal and panel fasteners periodically, same as any enclosed CoreXY.'],
+      ['mainboard', 'Drives two independent X/Y motors plus the usual heaters and the chamber camera feed.'],
+      ['psu', 'Internal, sized for the enclosed bed and dual-motor motion system.'],
+      ['display', 'Touchscreen plus app control; the built-in chamber camera lets you watch a print remotely.'],
+      ['filament-system', 'External spool feed into the enclosed chamber — dry filament before printing PETG/nylon, as with any enclosed CoreXY.'],
     ]),
   },
 ]

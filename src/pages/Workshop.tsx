@@ -20,25 +20,37 @@ export function Workshop() {
         {PRINTERS.map((p) => (
           <Link key={p.id} to={`/workshop/${p.id}`}>
             <Card className="transition-colors hover:border-accent">
-              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <h2 className="text-lg font-semibold text-ink">
-                  {p.maker} {p.name}
-                </h2>
-                <span className="font-mono text-xs text-muted">{p.year}</span>
-                <Badge tone="accent" className="ml-auto">
-                  {p.diagram === 'bedslinger' ? 'Bed-slinger' : 'CoreXY'}
-                </Badge>
-              </div>
-              <p className="mt-2 text-sm text-text">{p.blurb}</p>
-              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
-                {p.specs.slice(0, 4).map((s) => (
-                  <span key={s.label}>
-                    <span className="text-ink">{s.label}:</span> {s.value}
-                  </span>
-                ))}
-              </div>
-              <div className="mt-3 text-xs font-medium text-accent">
-                Open the breakdown →
+              <div className="flex gap-4">
+                {p.photo && (
+                  <img
+                    src={p.photo.url}
+                    alt={`${p.maker} ${p.name}`}
+                    className="hidden aspect-square w-20 shrink-0 rounded-lg object-cover sm:block"
+                    loading="lazy"
+                  />
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                    <h2 className="text-lg font-semibold text-ink">
+                      {p.maker} {p.name}
+                    </h2>
+                    <span className="font-mono text-xs text-muted">{p.year}</span>
+                    <Badge tone="accent" className="ml-auto">
+                      {p.diagram === 'bedslinger' ? 'Bed-slinger' : 'CoreXY'}
+                    </Badge>
+                  </div>
+                  <p className="mt-2 text-sm text-text">{p.blurb}</p>
+                  <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+                    {p.specs.slice(0, 4).map((s) => (
+                      <span key={s.label}>
+                        <span className="text-ink">{s.label}:</span> {s.value}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-3 text-xs font-medium text-accent">
+                    Open the breakdown →
+                  </div>
+                </div>
               </div>
             </Card>
           </Link>

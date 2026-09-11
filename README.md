@@ -84,7 +84,7 @@ not to secure it.
 
 ## Workshop
 
-`src/content/workshop.ts` holds `PART_LIBRARY` (≈20 parts — each with how-it-works,
+`src/content/workshop.ts` holds `PART_LIBRARY` (≈23 parts — each with how-it-works,
 failure symptoms, a maintenance schedule, and repair guidance, all universal to
 the part type) and `PRINTERS` (each machine composes a subset of parts, with
 per-model `note`s and a hotspot coordinate for its diagram).
@@ -98,22 +98,39 @@ prev/next to step through every part. Maintenance completion is stored in the
 progress store as `maintenanceLog` (`${printerId}:${partId}:${taskIndex}` →
 epoch ms); "due" is derived from the task's interval.
 
-v1 printers: **Creality Ender-3 V2**, **Prusa MK4S** (both bed-slinger),
-**Bambu Lab P1S** (CoreXY). Model-specific facts are drawn from general
-knowledge — the UI links each machine's official manual and tells users to
-verify procedures there. Add a printer by appending to `PRINTERS`; add a part by
-adding to `PART_LIBRARY` and referencing it.
+v1 printers: **Creality Ender-3 V2**, **Prusa MK4S** (bed-slinger); **Bambu Lab
+P1S, P2S, X1 Carbon, X1E, H2D**, **Snapmaker U1**, **Elegoo Centauri Carbon**
+(CoreXY). The three genuinely new hardware concepts introduced by the newer
+machines each get their own `PART_LIBRARY` entry rather than being forced into
+an existing one: `dual-nozzle-system` (Bambu H2D's two fully independent
+hotends), `laser-module` (H2D's optional bolt-on engraver/cutter — its own
+`accessory` category), and `toolchange-dock` (Snapmaker U1's four-toolhead
+"SnapSwap" system). Narrower differences (Bambu's Micro-LIDAR bed-probing/flow
+calibration, the X1E/H2D active chamber heater) are documented as rich `note`s
+on the existing `bed-probe`/`frame` parts instead of new part types, since they
+change *how* an existing part works rather than adding a new one. Model-specific
+facts are drawn from general knowledge and vendor documentation, checked against
+manufacturer wiki/spec pages before writing — the UI also links each machine's
+official manual and tells users to verify procedures there. Add a printer by
+appending to `PRINTERS`; add a part by adding to `PART_LIBRARY` and referencing it.
 
-### Part photos
+### Photos
 
-`PartInfo.photo` is optional — about a third of the ~20 parts have one, sourced
-from Wikimedia Commons and verified (content + license) before adding. Where no
-part-specific photo exists on Commons, the part shows the zoomed diagram alone
-rather than a mismatched stand-in. A few photos are explicitly **illustrative**
-(a generic cooling fan or PSU standing in for the general idea, a NEMA 17 motor
-representing "the stepper on this axis") — that's flagged in the photo's `note`
-field and shown under the image in amber. Every photo carries its real
-`credit` (photographer + license) per the source's terms.
+Both `PartInfo.photo` and the top-level `Printer.photo` are optional, sourced
+from Wikimedia Commons and verified (content + license, via the file's own
+Commons page) before adding. About a third of the ~23 parts have one; of the 9
+printers, only **Prusa MK4S**, **Bambu X1 Carbon**, and **Bambu X1E** have a
+machine photo — the rest are very recent (2025/2026) releases with no
+openly-licensed photo on Commons yet, or, for the Elegoo/Snapmaker/Creality/P1S
+entries, no clean match was found at all. Where no good photo exists, the part
+or printer shows the schematic diagram alone rather than a mismatched stand-in.
+Several photos are explicitly **illustrative** (a generic cooling fan or PSU
+standing in for the general idea, a NEMA 17 motor representing "the stepper on
+this axis", the MK4S shown via a Prusa MK4 photo since the two are externally
+identical, the X1E shown via its externally-identical X1 Carbon sibling) —
+that's flagged in the photo's `note` field and shown under the image in amber.
+Every photo carries its real `credit` (photographer + license) per the source's
+terms.
 
 ## Content model
 

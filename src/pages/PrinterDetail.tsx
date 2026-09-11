@@ -111,22 +111,41 @@ export function PrinterDetail() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <Link to="/workshop" className="text-xs text-muted hover:text-ink">
-          ← Workshop
-        </Link>
-        <h1 className="mt-1 text-2xl font-semibold text-ink">
-          {printer.maker} {printer.name}
-        </h1>
-        <p className="mt-1 text-sm text-muted">{printer.blurb}</p>
-        <a
-          href={printer.manualUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-2 inline-block text-xs text-accent hover:underline"
-        >
-          {printer.manualLabel} ↗
-        </a>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+        <div className="flex-1">
+          <Link to="/workshop" className="text-xs text-muted hover:text-ink">
+            ← Workshop
+          </Link>
+          <h1 className="mt-1 text-2xl font-semibold text-ink">
+            {printer.maker} {printer.name}
+          </h1>
+          <p className="mt-1 text-sm text-muted">{printer.blurb}</p>
+          <a
+            href={printer.manualUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-2 inline-block text-xs text-accent hover:underline"
+          >
+            {printer.manualLabel} ↗
+          </a>
+        </div>
+
+        {printer.photo && (
+          <figure className="w-full shrink-0 overflow-hidden rounded-xl border border-border bg-surface sm:w-64">
+            <img
+              src={printer.photo.url}
+              alt={`${printer.maker} ${printer.name}`}
+              className="aspect-[4/3] w-full object-cover"
+              loading="lazy"
+            />
+            <figcaption className="space-y-0.5 p-2.5 text-[11px] text-muted">
+              <div>{printer.photo.credit}</div>
+              {printer.photo.note && (
+                <div className="text-warn">{printer.photo.note}</div>
+              )}
+            </figcaption>
+          </figure>
+        )}
       </div>
 
       <div className="flex gap-1 border-b border-border">
