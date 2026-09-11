@@ -11,6 +11,7 @@ import { Avatar } from './Avatar'
 const NAV = [
   { to: '/', label: 'Dashboard', icon: '◱', end: true },
   { to: '/pathway', label: 'Learning Path', icon: '⋔' },
+  { to: '/tips', label: 'Quick Tips', icon: '▶' },
   { to: '/review', label: 'Review', icon: '↻' },
   { to: '/certificates', label: 'Certificates', icon: '🎓' },
   { to: '/workshop', label: 'Workshop', icon: '⚒' },

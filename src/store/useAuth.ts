@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { deleteAllClipsFor } from '../lib/clipsDb'
 
 /**
  * Local student profiles — a lightweight "who's using this device" picker,
@@ -67,6 +68,9 @@ export const useAuth = create<AuthState>()(
         } catch {
           /* storage unavailable — nothing more we can do */
         }
+        deleteAllClipsFor(id).catch(() => {
+          /* best-effort — an orphaned clip in IndexedDB isn't visible to anyone */
+        })
       },
 
       setActiveProfile: (id) => set({ activeProfileId: id }),

@@ -42,6 +42,7 @@ src/
     srs.ts                 SM-2-style flashcard scheduler
     markdown.tsx           tiny markdown renderer for lesson bodies
     image.ts               resize an uploaded photo to a small data URL
+    clipsDb.ts             IndexedDB storage for student-recorded Quick Tips clips
   components/
     ProfileGate            full-screen "who's making today?" picker, shown
                            whenever no profile is active (see App.tsx)
@@ -51,6 +52,7 @@ src/
     Dashboard              student avatar + greeting, rings, XP/streak/time,
                            weak-topic list, module chart
     Pathway                gamified vertical skill tree with prerequisite locks
+    QuickTips              vertical, swipeable short-video feed (see below)
     LessonPlayer           distraction-free reader; renders any lesson type
     Review                 spaced-repetition session across all decks
     Workshop / PrinterDetail  clickable printer schematics — per-part function,
@@ -78,9 +80,40 @@ content (`useCustomContent`) is intentionally **not** part of this — it is one
 shared library for every student on the device.
 
 Deleting a profile (in `ProfileGate` or Settings) removes its progress slot
-too. There is no password and no server — anyone with the device can open any
+too (and, in the same step, any Quick Tips clips they saved — see below).
+There is no password and no server — anyone with the device can open any
 profile; it exists to keep each student's own progress and photo separate,
 not to secure it.
+
+## Quick Tips
+
+`/tips` is a short-form, swipeable video feed (`src/pages/QuickTips.tsx`) —
+scroll-snap, one clip full-height at a time, in the spirit of a
+Shorts/Reels-style feed but purpose-built for "one idea at a time" 3D printing
+tips rather than a real social network. It mixes two sources:
+
+- **Curated tips** (`src/content/quickTips.ts`) — real, existing YouTube
+  Shorts, each linkable back to the matching full lesson ("Full lesson →").
+  Unlike the hand-picked full video lessons, these came from a broader search
+  and their creators haven't been individually vetted the way Thomas
+  Sanladerer / Teaching Tech have — **spot-check each one before relying on it
+  in front of a class**, same caution as the "creator not fully verified"
+  videos noted above.
+- **The student's own clips** — added via "+ Add a clip" (a video file picker;
+  on a phone this opens the camera too) and folded into their feed every few
+  curated tips. **There is no backend.** A clip is stored as a `Blob` in this
+  browser's IndexedDB (`src/lib/clipsDb.ts`, localStorage is far too small for
+  video), scoped to the profile that added it. It is **not** visible to other
+  students, even on the same device or the same class — "upload" here means
+  "save on this device," not "publish." Capped at {80MB, 1-2 minutes in
+  spirit} per clip and 30 clips per profile so a shared classroom machine
+  doesn't fill its disk. Real cross-device/cross-student sharing would need an
+  actual backend (e.g. Firebase Storage + Firestore) and a moderation plan —
+  a deliberate v1 scope cut, not an oversight.
+
+Watching a curated tip for a few seconds awards a small one-time XP bump
+(`watchTip` in `useProgress.ts`, `TIP_WATCH_XP`), the same idempotent pattern
+as lesson completion.
 
 ## Workshop
 

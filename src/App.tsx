@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import { Route, Routes, useLocation } from 'react-router-dom'
+import { NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { Sidebar } from './components/Sidebar'
 import { Logo } from './components/Logo'
 import { ProfileGate } from './components/ProfileGate'
@@ -8,12 +8,23 @@ import { useAuth } from './store/useAuth'
 import { syncActiveProfile } from './store/session'
 import { LessonPlayer } from './pages/LessonPlayer'
 import { NotFound } from './pages/NotFound'
+import { cn } from './components/ui'
+
+const BOTTOM_NAV = [
+  { to: '/', label: 'Home', icon: '◱', end: true },
+  { to: '/pathway', label: 'Path', icon: '⋔', end: false },
+  { to: '/tips', label: 'Tips', icon: '▶', end: false },
+  { to: '/workshop', label: 'Shop', icon: '⚒', end: false },
+] as const
 
 const Dashboard = lazy(() =>
   import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })),
 )
 const Pathway = lazy(() =>
   import('./pages/Pathway').then((m) => ({ default: m.Pathway })),
+)
+const QuickTips = lazy(() =>
+  import('./pages/QuickTips').then((m) => ({ default: m.QuickTips })),
 )
 const Review = lazy(() =>
   import('./pages/Review').then((m) => ({ default: m.Review })),
@@ -161,7 +172,7 @@ function AuthedApp() {
             </span>
           </div>
 
-          <main className="bp-grid min-h-svh px-4 py-6 sm:px-8 sm:py-10">
+          <main className="bp-grid min-h-svh px-4 pb-24 pt-6 sm:px-8 sm:pb-10 sm:pt-10">
             <div className="mx-auto max-w-4xl">
               <Suspense
                 fallback={
@@ -173,6 +184,7 @@ function AuthedApp() {
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/pathway" element={<Pathway />} />
+                <Route path="/tips" element={<QuickTips />} />
                 <Route
                   path="/learn/:moduleId/:lessonId"
                   element={<LessonPlayer />}
@@ -192,6 +204,34 @@ function AuthedApp() {
           </main>
         </div>
       </div>
+
+      {/* Mobile bottom nav — the most-used destinations one tap away. */}
+      <nav className="fixed inset-x-0 bottom-0 z-30 flex items-stretch justify-around border-t border-border bg-surface/95 backdrop-blur lg:hidden">
+        {BOTTOM_NAV.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) =>
+              cn(
+                'flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium',
+                isActive ? 'text-accent' : 'text-muted',
+              )
+            }
+          >
+            <span className="text-lg leading-none">{item.icon}</span>
+            {item.label}
+          </NavLink>
+        ))}
+        <button
+          type="button"
+          onClick={() => setDrawerOpen(true)}
+          className="flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium text-muted"
+        >
+          <span className="text-lg leading-none">≡</span>
+          More
+        </button>
+      </nav>
     </div>
   )
 }

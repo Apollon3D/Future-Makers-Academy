@@ -53,6 +53,8 @@ export interface ProgressData {
   maintenanceLog: Record<string, number>
   /** Earned certificates, keyed by level id. */
   certificates: Record<string, Certificate>
+  /** Quick Tips (src/content/quickTips.ts) ids the learner has watched. */
+  watchedTips: string[]
   /** Bumped whenever the learner does something meaningful (for effects). */
   activityNonce: number
 }
@@ -79,6 +81,9 @@ interface ProgressActions {
 
   /** Idempotent: awards once, first time called for a given level. */
   awardCertificate: (levelId: string) => void
+
+  /** Idempotent: marks a Quick Tip watched and awards its XP once. */
+  watchTip: (tipId: string) => void
 
   setProfile: (patch: Partial<PrinterProfile>) => void
   setTheme: (theme: 'dark' | 'light') => void
@@ -112,6 +117,7 @@ export const DEFAULT_PROGRESS: ProgressData = {
   lastLesson: null,
   maintenanceLog: {},
   certificates: {},
+  watchedTips: [],
   activityNonce: 0,
 }
 
@@ -279,6 +285,17 @@ export const useProgress = create<ProgressState>()(
           }
         }),
 
+      watchTip: (tipId) =>
+        set((s) => {
+          if (s.watchedTips.includes(tipId)) return {}
+          return {
+            watchedTips: [...s.watchedTips, tipId],
+            xp: s.xp + TIP_WATCH_XP,
+            streak: bumpStreak(s.streak),
+            activityNonce: s.activityNonce + 1,
+          }
+        }),
+
       setProfile: (patch) =>
         set((s) => ({ profile: { ...s.profile, ...patch } })),
 
@@ -303,12 +320,13 @@ export const useProgress = create<ProgressState>()(
           lastLesson: null,
           maintenanceLog: {},
           certificates: {},
+          watchedTips: [],
           activityNonce: 0,
         }),
     }),
     {
       name: PROGRESS_KEY_PREFIX,
-      version: 4,
+      version: 5,
       storage: createJSONStorage(() => profileScopedStorage),
       // We hydrate manually (see store/session.ts) because the right storage
       // slot depends on useAuth, which may not have hydrated itself yet at
@@ -319,6 +337,9 @@ export const useProgress = create<ProgressState>()(
     },
   ),
 )
+
+/** XP awarded the first time a Quick Tip is watched. */
+export const TIP_WATCH_XP = 5
 
 /** XP awarded for completing each lesson type. */
 export const XP_BY_TYPE: Record<string, number> = {
