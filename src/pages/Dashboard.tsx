@@ -21,12 +21,17 @@ import {
 } from '../content'
 import { Badge, Button, Card, ProgressRing, StatTile } from '../components/ui'
 import { BrandGlow } from '../components/BrandGlow'
-import { Logo } from '../components/Logo'
+import { Avatar } from '../components/Avatar'
+import { useAuth } from '../store/useAuth'
 import { formatDuration } from '../lib/format'
 
 export function Dashboard() {
   const navigate = useNavigate()
   const curr = useCurriculum()
+  const student = useAuth((s) =>
+    s.profiles.find((p) => p.id === s.activeProfileId),
+  )
+  const firstName = student?.name.trim().split(/\s+/)[0] || 'Maker'
   const {
     xp,
     streak,
@@ -76,9 +81,11 @@ export function Dashboard() {
       <header className="relative isolate">
         <BrandGlow />
         <div className="flex items-center gap-3">
-          <Logo size={32} />
+          <Avatar photo={student?.photo} name={firstName} size={40} />
           <h1 className="text-2xl font-semibold text-ink">
-            {overall.done === 0 ? 'Welcome to Future Makers' : 'Dashboard'}
+            {overall.done === 0
+              ? `Welcome, ${firstName}`
+              : `Welcome back, ${firstName}`}
           </h1>
         </div>
         <p className="mt-1 text-sm text-muted">

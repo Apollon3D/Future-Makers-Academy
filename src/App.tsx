@@ -2,7 +2,10 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { Sidebar } from './components/Sidebar'
 import { Logo } from './components/Logo'
+import { ProfileGate } from './components/ProfileGate'
 import { useProgress } from './store/useProgress'
+import { useAuth } from './store/useAuth'
+import { syncActiveProfile } from './store/session'
 import { LessonPlayer } from './pages/LessonPlayer'
 import { NotFound } from './pages/NotFound'
 
@@ -31,17 +34,40 @@ const Settings = lazy(() =>
   import('./pages/Settings').then((m) => ({ default: m.Settings })),
 )
 
+/**
+ * Top-level gate: wait for the auth store to hydrate from localStorage, then
+ * show either the profile picker or the real app. Theme is applied here too,
+ * since ProfileGate itself needs to render themed.
+ */
 function App() {
   const theme = useProgress((s) => s.theme)
+  const activeProfileId = useAuth((s) => s.activeProfileId)
+  const [hydrated, setHydrated] = useState(useAuth.persist.hasHydrated())
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+  }, [theme])
+
+  useEffect(() => {
+    if (hydrated) return
+    return useAuth.persist.onFinishHydration(() => setHydrated(true))
+  }, [hydrated])
+
+  // Once we know who (if anyone) is logged in, load their progress slot.
+  useEffect(() => {
+    if (hydrated) syncActiveProfile()
+  }, [hydrated])
+
+  if (!hydrated) return null
+  if (!activeProfileId) return <ProfileGate />
+  return <AuthedApp />
+}
+
+function AuthedApp() {
   const touchStreak = useProgress((s) => s.touchStreak)
   const addTime = useProgress((s) => s.addTime)
   const location = useLocation()
   const [drawerOpen, setDrawerOpen] = useState(false)
-
-  // Apply theme to <html>.
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme
-  }, [theme])
 
   // Streak: count today as active on first load.
   useEffect(() => {

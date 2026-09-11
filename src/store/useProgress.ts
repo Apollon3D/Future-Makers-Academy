@@ -1,8 +1,9 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage, type StateStorage } from 'zustand/middleware'
 import { type CardSchedule, newCard, schedule } from '../lib/srs'
 import { todayKey, daysBetween } from '../lib/format'
 import type { LessonRef } from '../types'
+import { PROGRESS_KEY_PREFIX, useAuth } from './useAuth'
 
 export interface PrinterProfile {
   name: string
@@ -29,8 +30,9 @@ export interface StreakState {
   lastActiveDay: string | null
 }
 
-interface ProgressState {
-  /** Composite keys: `${moduleId}/${lessonId}`. */
+/** The persisted data shape — no actions. Reused as the default state and to
+ *  rebuild a clean slate whenever the active student profile changes. */
+export interface ProgressData {
   completedLessons: string[]
   quizResults: Record<string, QuizResult>
   xp: number
@@ -40,13 +42,13 @@ interface ProgressState {
   profile: PrinterProfile
   theme: 'dark' | 'light'
   lastLesson: LessonRef | null
-  /** Modules added through the in-app authoring tool. */
-  customModules: unknown[]
   /** Workshop maintenance log: `${printerId}:${partId}:${taskIndex}` -> epoch ms last done. */
   maintenanceLog: Record<string, number>
   /** Bumped whenever the learner does something meaningful (for effects). */
   activityNonce: number
+}
 
+interface ProgressActions {
   isLessonComplete: (key: string) => boolean
   completeLesson: (key: string, xpAward: number) => void
   uncompleteLesson: (key: string) => void
@@ -69,10 +71,10 @@ interface ProgressState {
   setProfile: (patch: Partial<PrinterProfile>) => void
   setTheme: (theme: 'dark' | 'light') => void
   setLastLesson: (ref: LessonRef) => void
-  addCustomModule: (mod: unknown) => void
-  removeCustomModule: (id: string) => void
   resetProgress: () => void
 }
+
+type ProgressState = ProgressData & ProgressActions
 
 export const DEFAULT_PROFILE: PrinterProfile = {
   name: 'My Printer',
@@ -83,6 +85,21 @@ export const DEFAULT_PROFILE: PrinterProfile = {
   extruder: 'bowden',
   enclosed: false,
   materials: ['PLA'],
+}
+
+/** A brand-new student's starting data. */
+export const DEFAULT_PROGRESS: ProgressData = {
+  completedLessons: [],
+  quizResults: {},
+  xp: 0,
+  streak: { current: 0, longest: 0, lastActiveDay: null },
+  timeSpentSec: 0,
+  srs: {},
+  profile: DEFAULT_PROFILE,
+  theme: 'dark',
+  lastLesson: null,
+  maintenanceLog: {},
+  activityNonce: 0,
 }
 
 function bumpStreak(streak: StreakState): StreakState {
@@ -100,21 +117,47 @@ function bumpStreak(streak: StreakState): StreakState {
   }
 }
 
+/**
+ * Progress is per-student: the storage key is namespaced by whichever
+ * profile is currently logged in (see src/store/useAuth.ts). Switching
+ * profiles is handled explicitly in src/store/session.ts, which re-reads the
+ * target profile's slot and replaces state directly — this adapter only
+ * needs to read/write "whoever is active right now".
+ */
+const profileScopedStorage: StateStorage = {
+  getItem: (name) => {
+    const id = useAuth.getState().activeProfileId
+    if (!id) return null
+    try {
+      return localStorage.getItem(`${name}:${id}`)
+    } catch {
+      return null
+    }
+  },
+  setItem: (name, value) => {
+    const id = useAuth.getState().activeProfileId
+    if (!id) return
+    try {
+      localStorage.setItem(`${name}:${id}`, value)
+    } catch {
+      /* storage full or unavailable — progress just won't persist */
+    }
+  },
+  removeItem: (name) => {
+    const id = useAuth.getState().activeProfileId
+    if (!id) return
+    try {
+      localStorage.removeItem(`${name}:${id}`)
+    } catch {
+      /* ignore */
+    }
+  },
+}
+
 export const useProgress = create<ProgressState>()(
   persist(
     (set, get) => ({
-      completedLessons: [],
-      quizResults: {},
-      xp: 0,
-      streak: { current: 0, longest: 0, lastActiveDay: null },
-      timeSpentSec: 0,
-      srs: {},
-      profile: DEFAULT_PROFILE,
-      theme: 'dark',
-      lastLesson: null,
-      customModules: [],
-      maintenanceLog: {},
-      activityNonce: 0,
+      ...DEFAULT_PROGRESS,
 
       isLessonComplete: (key) => get().completedLessons.includes(key),
 
@@ -222,16 +265,6 @@ export const useProgress = create<ProgressState>()(
             : { lastLesson: ref },
         ),
 
-      addCustomModule: (mod) =>
-        set((s) => ({ customModules: [...s.customModules, mod] })),
-
-      removeCustomModule: (id) =>
-        set((s) => ({
-          customModules: s.customModules.filter(
-            (m) => (m as { id?: string }).id !== id,
-          ),
-        })),
-
       resetProgress: () =>
         set({
           completedLessons: [],
@@ -246,13 +279,9 @@ export const useProgress = create<ProgressState>()(
         }),
     }),
     {
-      name: 'future-makers-academy-progress',
-      version: 2,
-      migrate: (persisted) => {
-        const s = (persisted ?? {}) as Record<string, unknown>
-        if (!s.maintenanceLog) s.maintenanceLog = {}
-        return s as unknown as ProgressState
-      },
+      name: PROGRESS_KEY_PREFIX,
+      version: 3,
+      storage: createJSONStorage(() => profileScopedStorage),
     },
   ),
 )

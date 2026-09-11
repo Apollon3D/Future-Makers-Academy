@@ -28,17 +28,28 @@ src/
     index.ts               aggregation + progress/unlock helpers + JSON validator
     useCurriculum.ts       merges built-in modules with in-app authored ones
     workshop.ts            printers + shared part library for the Workshop
-  store/useProgress.ts     Zustand store: completions, XP, streak, time,
-                           spaced-repetition schedules, printer profile, theme.
-                           Persisted to localStorage.
+  store/
+    useAuth.ts             local student profiles (name + photo) + who's active
+    session.ts             switchProfile/logout/syncActiveProfile — the only
+                           code that should change which profile is active
+    useProgress.ts         Zustand store: completions, XP, streak, time,
+                           spaced-repetition schedules, printer profile, theme,
+                           maintenance log. Storage is namespaced per active
+                           student profile (see "Student profiles" below).
+    useCustomContent.ts    authored modules — shared by every profile on this
+                           device (NOT per-student)
   lib/
     srs.ts                 SM-2-style flashcard scheduler
     markdown.tsx           tiny markdown renderer for lesson bodies
+    image.ts               resize an uploaded photo to a small data URL
   components/
+    ProfileGate            full-screen "who's making today?" picker, shown
+                           whenever no profile is active (see App.tsx)
     widgets/               interactive "cause and effect" simulators + registry
     QuizBlock / FlashcardReview / ChecklistBlock / WidgetHost
   pages/
-    Dashboard              rings, XP/streak/time, weak-topic list, module chart
+    Dashboard              student avatar + greeting, rings, XP/streak/time,
+                           weak-topic list, module chart
     Pathway                gamified vertical skill tree with prerequisite locks
     LessonPlayer           distraction-free reader; renders any lesson type
     Review                 spaced-repetition session across all decks
@@ -46,8 +57,30 @@ src/
                            failure signs, and a maintenance log with due dates
     Sandbox                every widget, unlocked, for free exploration
     Author                 paste/validate/preview module JSON → add to the path
-    Settings               printer profile, theme, reset progress
+    Settings               my profile (name/photo, other students on this
+                           device), printer profile, theme, reset progress
 ```
+
+## Student profiles
+
+Login is required and is a **local, unsecured picker** — a name and optional
+photo per student, not an account system. On first load (or after "Switch
+student") `ProfileGate` shows every profile created on this device; picking
+one, or creating a new one, calls `switchProfile(id)` in `store/session.ts`.
+
+Each profile's `useProgress` data lives in its own `localStorage` slot
+(`future-makers-academy-progress:<profileId>`) via a custom Zustand `persist`
+storage adapter that reads the active id from `useAuth`. Switching profiles
+reads that slot directly (bypassing zustand's own async rehydration, which
+would race against "which profile is active") and does a hard navigation back
+to `/` so no other page's local state leaks between students. Authored
+content (`useCustomContent`) is intentionally **not** part of this — it is one
+shared library for every student on the device.
+
+Deleting a profile (in `ProfileGate` or Settings) removes its progress slot
+too. There is no password and no server — anyone with the device can open any
+profile; it exists to keep each student's own progress and photo separate,
+not to secure it.
 
 ## Workshop
 

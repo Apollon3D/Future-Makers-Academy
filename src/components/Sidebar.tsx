@@ -1,9 +1,12 @@
 import { NavLink } from 'react-router-dom'
 import { useProgress } from '../store/useProgress'
+import { useAuth } from '../store/useAuth'
+import { logout } from '../store/session'
 import { useCurriculum } from '../content/useCurriculum'
 import { allCards, overallProgress } from '../content'
 import { cn } from './ui'
 import { Logo } from './Logo'
+import { Avatar } from './Avatar'
 
 const NAV = [
   { to: '/', label: 'Dashboard', icon: '◱', end: true },
@@ -19,6 +22,9 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const curr = useCurriculum()
   const { xp, streak, completedLessons, theme, setTheme, dueCardIds } =
     useProgress()
+  const student = useAuth((s) =>
+    s.profiles.find((p) => p.id === s.activeProfileId),
+  )
 
   const cardIds = [...allCards(curr).keys()]
   const due = dueCardIds(cardIds).length
@@ -35,6 +41,24 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           </div>
         </div>
       </div>
+
+      {student && (
+        <div className="mx-2 mb-2 flex items-center gap-2.5 rounded-lg border border-border bg-surface-2 px-3 py-2">
+          <Avatar photo={student.photo} name={student.name} size={30} />
+          <div className="min-w-0 flex-1 leading-tight">
+            <div className="truncate text-sm font-medium text-ink">
+              {student.name}
+            </div>
+            <button
+              type="button"
+              onClick={logout}
+              className="text-[11px] text-muted hover:text-accent"
+            >
+              Switch student
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="mx-2 mb-2 overflow-hidden rounded-lg border border-border bg-surface-2 p-3">
         <div className="flex items-center justify-between text-xs">

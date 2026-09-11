@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useProgress } from '../store/useProgress'
+import { useCustomContent } from '../store/useCustomContent'
 import { parseModule } from '../content'
 import { Badge, Button, Card, cn } from '../components/ui'
 import { Markdown } from '../lib/markdown'
@@ -41,7 +41,8 @@ const TEMPLATE = `{
 }`
 
 export function Author() {
-  const { customModules, addCustomModule, removeCustomModule } = useProgress()
+  const { customModules, addCustomModule, removeCustomModule } =
+    useCustomContent()
   const [text, setText] = useState('')
   const [saved, setSaved] = useState<string | null>(null)
 
