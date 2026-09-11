@@ -20,6 +20,8 @@ import {
   overallProgress,
 } from '../content'
 import { Badge, Button, Card, ProgressRing, StatTile } from '../components/ui'
+import { BrandGlow } from '../components/BrandGlow'
+import { Logo } from '../components/Logo'
 import { formatDuration } from '../lib/format'
 
 export function Dashboard() {
@@ -71,11 +73,17 @@ export function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <header>
-        <h1 className="text-2xl font-semibold text-ink">Dashboard</h1>
+      <header className="relative isolate">
+        <BrandGlow />
+        <div className="flex items-center gap-3">
+          <Logo size={32} />
+          <h1 className="text-2xl font-semibold text-ink">
+            {overall.done === 0 ? 'Welcome to Future Makers' : 'Dashboard'}
+          </h1>
+        </div>
         <p className="mt-1 text-sm text-muted">
           {overall.done === 0
-            ? 'Welcome. Start with FDM Fundamentals and work down the path.'
+            ? 'Start with FDM Fundamentals and work down the path.'
             : `${overall.done} of ${overall.total} lessons done — ${Math.round(
                 overall.pct,
               )}% of the course.`}

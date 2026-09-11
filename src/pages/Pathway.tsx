@@ -8,6 +8,7 @@ import {
   moduleProgress,
 } from '../content'
 import { Badge, cn } from '../components/ui'
+import { BrandGlow } from '../components/BrandGlow'
 import type { LessonType } from '../types'
 
 const TYPE_GLYPH: Record<LessonType, string> = {
@@ -33,7 +34,8 @@ export function Pathway() {
 
   return (
     <div className="space-y-6">
-      <header>
+      <header className="relative isolate">
+        <BrandGlow />
         <h1 className="text-2xl font-semibold text-ink">Learning Path</h1>
         <p className="mt-1 text-sm text-muted">
           Work top to bottom. Each module unlocks when its prerequisites are

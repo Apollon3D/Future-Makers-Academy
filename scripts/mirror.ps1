@@ -4,7 +4,7 @@
 # (Google Drive's virtual filesystem can't host them and breaks npm).
 param(
   [string]$Source = "C:\Users\lucas\Projects\3DPrintingAcademy",
-  [string]$Dest   = "G:\My Drive\Apollon3D\Apps\Filament Academy",
+  [string]$Dest   = "G:\My Drive\Apollon3D\Apps\Future Makers Academy",
   [int]$IntervalSeconds = 2
 )
 

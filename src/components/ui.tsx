@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import { useId, type ButtonHTMLAttributes, type ReactNode } from 'react'
 
 export function cn(...parts: Array<string | false | null | undefined>): string {
   return parts.filter(Boolean).join(' ')
@@ -16,7 +16,7 @@ export function Card({
   return (
     <As
       className={cn(
-        'rounded-xl border border-border bg-surface p-5 shadow-sm',
+        'rounded-xl border border-border bg-surface p-5 shadow-[0_1px_0_0_rgba(255,255,255,0.03)_inset,0_8px_20px_-12px_rgba(0,0,0,0.5)] transition-colors duration-200',
         className,
       )}
     >
@@ -62,7 +62,7 @@ type ButtonVariant = 'primary' | 'ghost' | 'outline' | 'danger'
 
 const buttonVariants: Record<ButtonVariant, string> = {
   primary:
-    'bg-accent text-accent-ink hover:brightness-110 disabled:opacity-50 disabled:hover:brightness-100',
+    'text-accent-ink shadow-[0_0_0_0_transparent] hover:shadow-[0_0_16px_-2px_var(--accent)] hover:brightness-110 disabled:opacity-50 disabled:hover:shadow-none disabled:hover:brightness-100',
   ghost: 'text-text hover:bg-surface-2 hover:text-ink',
   outline: 'border border-border-strong text-text hover:bg-surface-2 hover:text-ink',
   danger:
@@ -73,6 +73,7 @@ export function Button({
   children,
   variant = 'primary',
   className,
+  style,
   ...rest
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant
@@ -80,8 +81,17 @@ export function Button({
   return (
     <button
       {...rest}
+      style={
+        variant === 'primary'
+          ? {
+              background:
+                'linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, var(--xp)))',
+              ...style,
+            }
+          : style
+      }
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-[background-color,filter,color] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+        'inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-[background-color,filter,color,box-shadow] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
         buttonVariants[variant],
         className,
       )}
@@ -91,20 +101,22 @@ export function Button({
   )
 }
 
-/** SVG donut progress ring. */
+/** SVG donut progress ring. Defaults to a teal→gold brand gradient stroke. */
 export function ProgressRing({
   value,
   size = 56,
   stroke = 5,
   label,
-  tone = 'var(--accent)',
+  tone,
 }: {
   value: number
   size?: number
   stroke?: number
   label?: ReactNode
+  /** Solid colour override; omit to use the brand gradient. */
   tone?: string
 }) {
+  const gid = useId()
   const r = (size - stroke) / 2
   const c = 2 * Math.PI * r
   const pct = Math.max(0, Math.min(100, value))
@@ -114,6 +126,14 @@ export function ProgressRing({
       style={{ width: size, height: size }}
     >
       <svg width={size} height={size} className="-rotate-90">
+        {!tone && (
+          <defs>
+            <linearGradient id={gid} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="var(--accent)" />
+              <stop offset="100%" stopColor="var(--xp)" />
+            </linearGradient>
+          </defs>
+        )}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -127,7 +147,7 @@ export function ProgressRing({
           cy={size / 2}
           r={r}
           fill="none"
-          stroke={tone}
+          stroke={tone ?? `url(#${gid})`}
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={c}

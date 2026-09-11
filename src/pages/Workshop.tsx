@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom'
 import { PRINTERS, PART_LIBRARY } from '../content/workshop'
 import { Badge, Card } from '../components/ui'
+import { BrandGlow } from '../components/BrandGlow'
 
 export function Workshop() {
   return (
     <div className="space-y-6">
-      <header>
+      <header className="relative isolate">
+        <BrandGlow />
         <h1 className="text-2xl font-semibold text-ink">Workshop</h1>
         <p className="mt-1 text-sm text-muted">
           Pick a printer and take it apart, part by part — what each component

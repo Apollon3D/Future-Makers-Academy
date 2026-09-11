@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { Sidebar } from './components/Sidebar'
+import { Logo } from './components/Logo'
 import { useProgress } from './store/useProgress'
 import { LessonPlayer } from './pages/LessonPlayer'
 import { NotFound } from './pages/NotFound'
@@ -110,8 +111,9 @@ function App() {
             >
               ≡
             </button>
+            <Logo size={22} />
             <span className="text-sm font-semibold text-ink">
-              Filament Academy
+              Future Makers Academy
             </span>
           </div>
 

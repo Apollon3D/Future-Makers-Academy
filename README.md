@@ -1,8 +1,8 @@
-# Filament Academy
+# Future Makers Academy
 
-An interactive, **simulation-first learning platform for FDM 3D printing**.
-Built as a JSON-driven LMS: the whole curriculum is data, so new lessons never
-require code changes.
+An interactive, **simulation-first learning platform for FDM 3D printing**,
+by [Apollon3D](https://apollon3d.com). Built as a JSON-driven LMS: the whole
+curriculum is data, so new lessons never require code changes.
 
 Vite + React 19 + TypeScript · Tailwind CSS v4 · Zustand (persisted) · Recharts.
 
@@ -17,7 +17,7 @@ npm run build    # typecheck + production build to dist/
 > This project lives at `C:\Users\lucas\Projects\3DPrintingAcademy` (a working
 > copy off Google Drive, because Drive's virtual filesystem breaks
 > `npm install`). `scripts/mirror.ps1` syncs source-only into
-> `G:\My Drive\Apollon3D\Apps\Filament Academy`.
+> `G:\My Drive\Apollon3D\Apps\Future Makers Academy`.
 
 ## How it's structured
 

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useProgress, DEFAULT_PROFILE } from '../store/useProgress'
 import { Button, Card, Labeled } from '../components/ui'
+import { Logo } from '../components/Logo'
 
 const inputCls =
   'w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-accent'
@@ -162,6 +163,27 @@ export function Settings() {
             </Button>
           </div>
         )}
+      </Card>
+
+      <Card className="flex items-center gap-4">
+        <Logo size={36} />
+        <div>
+          <div className="text-sm font-semibold text-ink">
+            Future Makers Academy
+          </div>
+          <p className="mt-0.5 text-xs text-muted">
+            Built by{' '}
+            <a
+              href="https://apollon3d.com"
+              target="_blank"
+              rel="noreferrer"
+              className="text-xp hover:underline"
+            >
+              Apollon3D
+            </a>
+            . Everything on this page lives only in this browser.
+          </p>
+        </div>
       </Card>
     </div>
   )

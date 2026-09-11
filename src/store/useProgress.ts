@@ -246,7 +246,7 @@ export const useProgress = create<ProgressState>()(
         }),
     }),
     {
-      name: 'filament-academy-progress',
+      name: 'future-makers-academy-progress',
       version: 2,
       migrate: (persisted) => {
         const s = (persisted ?? {}) as Record<string, unknown>
