@@ -8,14 +8,23 @@ export function PrinterDiagram({
   printer,
   selectedPartId,
   onSelect,
+  /** When set, crops+magnifies the schematic around this point instead of
+   *  showing the whole machine — used by the part "focus" view. */
+  focus,
 }: {
   printer: Printer
   selectedPartId: string | null
   onSelect: (partId: string) => void
+  focus?: { x: number; y: number }
 }) {
+  const zoom = 95 // half-width of the focus window, in diagram units
+  const viewBox = focus
+    ? `${focus.x - zoom} ${focus.y - zoom} ${zoom * 2} ${zoom * 2}`
+    : '0 0 440 400'
+
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-surface">
-      <svg viewBox="0 0 440 400" className="w-full">
+      <svg viewBox={viewBox} className="w-full">
         <g
           stroke="var(--border-strong)"
           strokeWidth={2}

@@ -65,6 +65,18 @@ export interface PartInfo {
   /** Markdown: repair / replacement guidance. */
   repair: string
   relatedLessons?: LessonRef[]
+  /** A real, openly-licensed reference photo shown in the part's focus view. */
+  photo?: PartPhoto
+}
+
+export interface PartPhoto {
+  /** Direct image URL (Wikimedia Commons Special:FilePath links are stable). */
+  url: string
+  /** e.g. "Photo: Jane Doe, CC BY-SA 4.0, via Wikimedia Commons" */
+  credit: string
+  /** Shown under the photo — use this to flag when it's illustrative rather
+   *  than an exact match (e.g. a generic fan standing in for a small one). */
+  note?: string
 }
 
 export const CATEGORY_LABEL: Record<PartCategory, string> = {
@@ -154,6 +166,11 @@ export const PART_LIBRARY: Record<string, PartInfo> = {
       { interval: 'annual', task: 'Replace as a wear item even if still spinning — they are a few dollars and failure means a ruined print' },
     ],
     repair: `Direct swap: match the size (usually 40×40×10 mm) and voltage (24 V on most modern printers, 12 V on older ones — check!). Note the airflow direction arrow on the frame points *into* the heatsink. Keep the old one as a shroud template if the new fan's wire exits a different side.`,
+    photo: {
+      url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Xilence_120mm_cooling_fan_of_a_power_supply_unit.jpg?width=700',
+      credit: 'Photo: Clive Darra, CC BY-SA 2.0, via Wikimedia Commons',
+      note: 'Illustrative — a generic cooling fan. The hotend fan itself is usually a much smaller 40 mm size.',
+    },
   },
 
   'part-fan': {
@@ -173,6 +190,11 @@ export const PART_LIBRARY: Record<string, PartInfo> = {
     ],
     repair: `Ducts are the most-printed spare part there is — print one in PETG or ABS (PLA sags near the hotend). Blower fans (usually 5015 or 4010) are a direct swap; keep the connector polarity. If overhangs improved only slightly after a duct upgrade, the fan itself may be weak — upgrade both together.`,
     relatedLessons: [{ moduleId: 'slicer', lessonId: 'speed-temp' }, { moduleId: 'dfam', lessonId: 'overhangs' }],
+    photo: {
+      url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Xilence_120mm_cooling_fan_of_a_power_supply_unit.jpg?width=700',
+      credit: 'Photo: Clive Darra, CC BY-SA 2.0, via Wikimedia Commons',
+      note: 'Illustrative — a generic cooling fan. Part-cooling fans on a hotend are usually a much smaller 40–50 mm blower.',
+    },
   },
 
   extruder: {
@@ -193,6 +215,11 @@ export const PART_LIBRARY: Record<string, PartInfo> = {
     ],
     repair: `A worn hobbed gear (teeth rounded, packed with plastic) is a common silent killer — replace it and clicking often vanishes. On a geared extruder, a cracked plastic housing (common on budget machines) lets the gears splay under load; the aluminium replacement is a worthwhile upgrade. Re-check E-steps after any extruder change.`,
     relatedLessons: [{ moduleId: 'troubleshooting', lessonId: 'extrusion-issues' }, { moduleId: 'fundamentals', lessonId: 'printer-anatomy' }],
+    photo: {
+      url: 'https://commons.wikimedia.org/wiki/Special:FilePath/MakerBot%20SmartExtruder%20(14258107128).jpg?width=700',
+      credit: 'Photo: Creative Tools, CC BY 2.0, via Wikimedia Commons',
+      note: 'A direct-drive extruder/toolhead assembly (MakerBot SmartExtruder) — the general layout, not this printer’s exact part.',
+    },
   },
 
   bowden: {
@@ -250,6 +277,11 @@ export const PART_LIBRARY: Record<string, PartInfo> = {
     ],
     repair: `A pulley grub screw backed off the motor-shaft flat is a top cause of "random layer shifts" — mark it and torque it onto the flat. Replace a belt when teeth are rounded or it has stretched past the tensioner's range. Idler pulleys that squeak or wobble have a dead bearing — swap them.`,
     relatedLessons: [{ moduleId: 'troubleshooting', lessonId: 'layer-shift' }],
+    photo: {
+      url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Nema_17_Stepper_Motor.jpg?width=700',
+      credit: 'Photo: oomlout, CC BY-SA 2.0, via Wikimedia Commons',
+      note: 'A NEMA 17 stepper motor — the standard size driving this axis on nearly every consumer FDM printer.',
+    },
   },
 
   'y-axis': {
@@ -307,6 +339,11 @@ export const PART_LIBRARY: Record<string, PartInfo> = {
     ],
     repair: `The classic single-screw bed-slinger fix: make sure the top of the screw is **not** rigidly held — it should be free to wobble slightly so the nut, not the screw, defines position. A visibly bent screw (roll it on glass) must be replaced. On dual-Z machines without independent motors, a toothed belt links the screws — check its tension too. Anti-backlash nuts remove play if banding persists.`,
     relatedLessons: [{ moduleId: 'troubleshooting', lessonId: 'layer-shift' }],
+    photo: {
+      url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Nema_17_Stepper_Motor.jpg?width=700',
+      credit: 'Photo: oomlout, CC BY-SA 2.0, via Wikimedia Commons',
+      note: 'A NEMA 17 stepper motor — the standard size driving the leadscrew on nearly every consumer FDM printer.',
+    },
   },
 
   'bed-probe': {
@@ -402,6 +439,11 @@ export const PART_LIBRARY: Record<string, PartInfo> = {
       { interval: 'biannual', task: 'Re-seat plug-in drivers and connectors; check screw terminals for the heaters/PSU are tight and not browned' },
     ],
     repair: `A single dead axis is usually one driver — on boards with plug-in drivers, swap it with a working axis to confirm, then replace. Keep firmware backups before flashing. If a heater terminal has overheated, the crimp was loose — re-crimp with a ferrule; don't just retighten a damaged wire. Never disable thermal-runaway protection to "fix" a heater error.`,
+    photo: {
+      url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Arduino_MEGA_2560_R3,_front_side.jpg?width=700',
+      credit: 'Photo: Dsimic, CC BY-SA 4.0, via Wikimedia Commons',
+      note: 'An Arduino Mega 2560 — the microcontroller under many budget boards (e.g. RAMPS-based). Prusa, Bambu and other vendors use their own custom boards instead.',
+    },
   },
 
   psu: {
@@ -420,6 +462,11 @@ export const PART_LIBRARY: Record<string, PartInfo> = {
       { interval: 'biannual', task: 'Confirm the mains voltage selector (if fitted) matches your country; check the mains lead and inlet for damage' },
     ],
     repair: `Loose or under-gauge DC output wiring is a genuine fire risk — the bed wires especially should be tight, ferruled, and strain-relieved. A PSU that clicks and won't start is often in over-current shutdown from a shorted bed or hotend wire; find the short before replacing the PSU. Replace like-for-like on voltage and with equal or greater wattage.`,
+    photo: {
+      url: 'https://commons.wikimedia.org/wiki/Special:FilePath/XT-PC-Power-Supply-PSU-SMPS-IMG%200445.JPG?width=700',
+      credit: 'Photo: Hans Haase, CC BY-SA 3.0, via Wikimedia Commons',
+      note: 'The inside of a switch-mode power supply — the general layout (transformer, capacitors, output terminals) is the same idea as a printer’s 24 V PSU.',
+    },
   },
 
   display: {
@@ -437,6 +484,11 @@ export const PART_LIBRARY: Record<string, PartInfo> = {
       { interval: 'biannual', task: 'Re-seat the display ribbon/cable at both ends; keep the screen and knob free of plastic dust' },
     ],
     repair: `A suddenly garbled LCD after moving the printer is almost always a half-unseated ribbon cable — push both connectors home. Displays are cheap, model-specific direct swaps. If only the SD card slot fails, a USB card reader on the board's host port is an easy workaround.`,
+    photo: {
+      url: 'https://commons.wikimedia.org/wiki/Special:FilePath/16x2_Character_LCD_Display.jpg?width=700',
+      credit: 'Photo: oomlout, CC BY-SA 2.0, via Wikimedia Commons',
+      note: 'A character LCD like the ones on many budget printers. Prosumer machines more often use a colour touchscreen instead.',
+    },
   },
 
   'filament-system': {
@@ -456,6 +508,10 @@ export const PART_LIBRARY: Record<string, PartInfo> = {
     ],
     repair: `Add a bearing-based spool holder or roller if the stock one drags. A runout sensor that cries wolf can be cleaned, adjusted, or disabled in firmware if it causes more failed prints than it saves. For the thirsty materials, print straight from a dry box — no amount of printer tuning fixes wet filament.`,
     relatedLessons: [{ moduleId: 'materials', lessonId: 'moisture' }],
+    photo: {
+      url: 'https://commons.wikimedia.org/wiki/Special:FilePath/ABS_filament_spool.jpg?width=700',
+      credit: 'Photo: Tatár Lehel, CC BY-SA 3.0 / GFDL, via Wikimedia Commons',
+    },
   },
 }
 

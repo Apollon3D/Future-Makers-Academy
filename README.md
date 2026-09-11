@@ -90,16 +90,30 @@ the part type) and `PRINTERS` (each machine composes a subset of parts, with
 per-model `note`s and a hotspot coordinate for its diagram).
 
 `src/components/PrinterDiagram.tsx` draws a schematic front elevation
-(`bedslinger` or `corexy`) with numbered, clickable hotspots. Maintenance
-completion is stored in the progress store as `maintenanceLog`
-(`${printerId}:${partId}:${taskIndex}` → epoch ms); "due" is derived from the
-task's interval.
+(`bedslinger` or `corexy`) with numbered, clickable hotspots; passing a
+`focus={x,y}` prop crops+magnifies the same drawing around one hotspot. Clicking
+any part switches `PrinterDetail` into **focus mode**: a real reference photo
+(when one exists) beside the zoomed diagram, then the full write-up below, with
+prev/next to step through every part. Maintenance completion is stored in the
+progress store as `maintenanceLog` (`${printerId}:${partId}:${taskIndex}` →
+epoch ms); "due" is derived from the task's interval.
 
 v1 printers: **Creality Ender-3 V2**, **Prusa MK4S** (both bed-slinger),
 **Bambu Lab P1S** (CoreXY). Model-specific facts are drawn from general
 knowledge — the UI links each machine's official manual and tells users to
 verify procedures there. Add a printer by appending to `PRINTERS`; add a part by
 adding to `PART_LIBRARY` and referencing it.
+
+### Part photos
+
+`PartInfo.photo` is optional — about a third of the ~20 parts have one, sourced
+from Wikimedia Commons and verified (content + license) before adding. Where no
+part-specific photo exists on Commons, the part shows the zoomed diagram alone
+rather than a mismatched stand-in. A few photos are explicitly **illustrative**
+(a generic cooling fan or PSU standing in for the general idea, a NEMA 17 motor
+representing "the stepper on this axis") — that's flagged in the photo's `note`
+field and shown under the image in amber. Every photo carries its real
+`credit` (photographer + license) per the source's terms.
 
 ## Content model
 

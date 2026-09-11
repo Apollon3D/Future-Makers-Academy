@@ -40,15 +40,21 @@ const INTERVAL_ORDER: MaintenanceInterval[] = [
   'as-needed',
 ]
 
+type View = 'overview' | 'focus'
+
 export function PrinterDetail() {
   const { printerId = '' } = useParams()
   const printer = getPrinter(printerId)
   const curr = useCurriculum()
   const { maintenanceLog, logMaintenance, clearMaintenance } = useProgress()
   const [tab, setTab] = useState<Tab>('breakdown')
-  const [selected, setSelected] = useState<string | null>(
-    printer?.parts[0]?.partId ?? null,
-  )
+  const [selected, setSelected] = useState<string | null>(null)
+  const [view, setView] = useState<View>('overview')
+
+  const focusOn = (partId: string) => {
+    setSelected(partId)
+    setView('focus')
+  }
 
   const isDue = useMemo(() => {
     return (key: string, interval: MaintenanceInterval) => {
@@ -147,16 +153,16 @@ export function PrinterDetail() {
       </div>
 
       {tab === 'breakdown' ? (
-        <div className="space-y-6">
+        view === 'overview' ? (
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
             <div className="lg:sticky lg:top-6 lg:self-start">
               <PrinterDiagram
                 printer={printer}
                 selectedPartId={selected}
-                onSelect={setSelected}
+                onSelect={focusOn}
               />
               <p className="mt-2 text-center text-xs text-muted">
-                Tap a number on the diagram or in the list.
+                Tap a number on the diagram or in the list to focus on that part.
               </p>
             </div>
 
@@ -170,30 +176,22 @@ export function PrinterDetail() {
                     {refs.map((ref) => {
                       const info = PART_LIBRARY[ref.partId]
                       const n = indexOf(ref.partId) + 1
-                      const active = ref.partId === selected
                       return (
                         <li key={ref.partId}>
                           <button
                             type="button"
-                            onClick={() => setSelected(ref.partId)}
-                            className={cn(
-                              'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm',
-                              active
-                                ? 'bg-accent-soft text-accent'
-                                : 'text-text hover:bg-surface-2 hover:text-ink',
-                            )}
+                            onClick={() => focusOn(ref.partId)}
+                            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-text hover:bg-surface-2 hover:text-ink"
                           >
-                            <span
-                              className={cn(
-                                'grid h-5 w-5 shrink-0 place-items-center rounded-full border text-[10px] font-semibold',
-                                active
-                                  ? 'border-accent bg-accent text-accent-ink'
-                                  : 'border-border-strong text-muted',
-                              )}
-                            >
+                            <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full border border-border-strong text-[10px] font-semibold text-muted">
                               {n}
                             </span>
                             {info?.name}
+                            {info?.photo && (
+                              <span title="Reference photo available" className="text-[10px] text-muted">
+                                📷
+                              </span>
+                            )}
                           </button>
                         </li>
                       )
@@ -203,9 +201,77 @@ export function PrinterDetail() {
               ))}
             </div>
           </div>
+        ) : (
+          selectedInfo &&
+          selectedRef && (
+            <div className="animate-fade-rise space-y-5">
+              <div className="flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => setView('overview')}
+                  className="text-sm font-medium text-accent hover:underline"
+                >
+                  ← Full diagram
+                </button>
+                <div className="flex items-center gap-2 text-xs text-muted">
+                  <button
+                    type="button"
+                    disabled={indexOf(selectedInfo.id) === 0}
+                    onClick={() => focusOn(printer.parts[indexOf(selectedInfo.id) - 1].partId)}
+                    className="rounded-md border border-border px-2 py-1 hover:text-ink disabled:opacity-30"
+                  >
+                    ← Prev
+                  </button>
+                  <span>
+                    Part {indexOf(selectedInfo.id) + 1} / {printer.parts.length}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={indexOf(selectedInfo.id) === printer.parts.length - 1}
+                    onClick={() => focusOn(printer.parts[indexOf(selectedInfo.id) + 1].partId)}
+                    className="rounded-md border border-border px-2 py-1 hover:text-ink disabled:opacity-30"
+                  >
+                    Next →
+                  </button>
+                </div>
+              </div>
 
-          {selectedInfo && selectedRef && (
-            <Card className="animate-fade-rise">
+              <div className="grid gap-4 sm:grid-cols-2">
+                {selectedInfo.photo ? (
+                  <figure className="overflow-hidden rounded-xl border border-border bg-surface">
+                    <img
+                      src={selectedInfo.photo.url}
+                      alt={selectedInfo.name}
+                      className="aspect-[4/3] w-full object-cover"
+                      loading="lazy"
+                    />
+                    <figcaption className="space-y-0.5 p-2.5 text-[11px] text-muted">
+                      <div>{selectedInfo.photo.credit}</div>
+                      {selectedInfo.photo.note && (
+                        <div className="text-warn">{selectedInfo.photo.note}</div>
+                      )}
+                    </figcaption>
+                  </figure>
+                ) : (
+                  <div className="grid aspect-[4/3] place-items-center rounded-xl border border-dashed border-border bg-surface-2 p-4 text-center text-xs text-muted">
+                    No reference photo yet for this part — see the diagram for
+                    where it sits.
+                  </div>
+                )}
+                <div>
+                  <PrinterDiagram
+                    printer={printer}
+                    selectedPartId={selected}
+                    onSelect={focusOn}
+                    focus={selectedRef.hotspot}
+                  />
+                  <p className="mt-1.5 text-center text-xs text-muted">
+                    Zoomed to where this part sits on the machine.
+                  </p>
+                </div>
+              </div>
+
+              <Card>
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="text-xs uppercase tracking-wide text-muted">
@@ -321,9 +387,10 @@ export function PrinterDetail() {
                     </div>
                   </section>
                 )}
-            </Card>
-          )}
-        </div>
+              </Card>
+            </div>
+          )
+        )
       ) : (
         <MaintenanceTab
           tasks={allTasks}
